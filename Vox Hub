@@ -1,201 +1,573 @@
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local RS = game:GetService("ReplicatedStorage")
+repeat task.wait() until game:IsLoaded() and game:GetService("Players").LocalPlayer
 
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+Players = game:GetService("Players")
+RunService = game:GetService("RunService")
+ReplicatedStorage = game:GetService("ReplicatedStorage")
+Workspace = game:GetService("Workspace")
+VirtualInputManager = game:GetService("VirtualInputManager")
+VirtualUser = game:GetService("VirtualUser")
+TweenService = game:GetService("TweenService")
+UserInputService = game:GetService("UserInputService")
+HttpService = game:GetService("HttpService")
+CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
+CommE = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommE")
 
--- ================= HELPERS =================
-local function cloneTable(t)
-    local copy = {}
-    for k, v in pairs(t) do copy[k] = v end
-    return copy
-end
+LocalPlayer = Players.LocalPlayer
+Net = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("Net")
 
-local PRESETS = {
-    Escuro = {bg=Color3.fromRGB(18,18,24),bgSoft=Color3.fromRGB(24,24,32),sidebar=Color3.fromRGB(14,14,19),topbar=Color3.fromRGB(22,22,30),card=Color3.fromRGB(28,28,38),cardHover=Color3.fromRGB(34,34,46),stroke=Color3.fromRGB(45,45,58),accent=Color3.fromRGB(120,90,255),accent2=Color3.fromRGB(80,200,255),text=Color3.fromRGB(238,238,245),textDim=Color3.fromRGB(150,150,165),danger=Color3.fromRGB(235,80,90),alpha=0},
-    Claro = {bg=Color3.fromRGB(245,245,250),bgSoft=Color3.fromRGB(235,235,242),sidebar=Color3.fromRGB(225,225,235),topbar=Color3.fromRGB(238,238,245),card=Color3.fromRGB(255,255,255),cardHover=Color3.fromRGB(245,245,250),stroke=Color3.fromRGB(200,200,215),accent=Color3.fromRGB(90,60,220),accent2=Color3.fromRGB(40,160,220),text=Color3.fromRGB(30,30,40),textDim=Color3.fromRGB(110,110,125),danger=Color3.fromRGB(220,60,70),alpha=0},
-    Neon = {bg=Color3.fromRGB(10,5,20),bgSoft=Color3.fromRGB(20,10,35),sidebar=Color3.fromRGB(8,4,16),topbar=Color3.fromRGB(15,8,28),card=Color3.fromRGB(25,12,45),cardHover=Color3.fromRGB(35,18,60),stroke=Color3.fromRGB(70,30,110),accent=Color3.fromRGB(0,255,200),accent2=Color3.fromRGB(255,0,200),text=Color3.fromRGB(240,240,255),textDim=Color3.fromRGB(140,120,180),danger=Color3.fromRGB(255,50,100),alpha=0},
-    MeiaNoite = {bg=Color3.fromRGB(8,10,18),bgSoft=Color3.fromRGB(14,18,30),sidebar=Color3.fromRGB(5,7,14),topbar=Color3.fromRGB(11,14,24),card=Color3.fromRGB(18,22,36),cardHover=Color3.fromRGB(26,32,50),stroke=Color3.fromRGB(35,42,62),accent=Color3.fromRGB(60,120,255),accent2=Color3.fromRGB(0,200,255),text=Color3.fromRGB(225,230,245),textDim=Color3.fromRGB(120,130,155),danger=Color3.fromRGB(240,80,100),alpha=0},
-    Transparente = {bg=Color3.fromRGB(255,255,255),bgSoft=Color3.fromRGB(255,255,255),sidebar=Color3.fromRGB(255,255,255),topbar=Color3.fromRGB(255,255,255),card=Color3.fromRGB(255,255,255),cardHover=Color3.fromRGB(240,240,240),stroke=Color3.fromRGB(200,200,200),accent=Color3.fromRGB(120,90,255),accent2=Color3.fromRGB(80,200,255),text=Color3.fromRGB(30,30,40),textDim=Color3.fromRGB(120,120,130),danger=Color3.fromRGB(235,80,90),alpha=0.7},
+LangEnglish = (function()
+    local env = getgenv and getgenv()
+    if type(env) ~= "table" then return false end
+    local lang = env.Language
+    if type(lang) ~= "string" then lang = env.language end
+    if type(lang) ~= "string" then return false end
+    lang = string.lower(lang)
+    return lang == "english" or lang == "en" or lang == "eng"
+end)()
+
+LangMap = {
+    ["脚本已在运行中，请勿重复执行！"] = "Script is already running, do not execute again!",
+    ["基础版"] = "Basic",
+    ["自动赏金"] = "Auto Bounty",
+    ["技能配置"] = "Skill Config",
+    ["战斗设置"] = "Combat Settings",
+    ["服务器"] = "Server",
+    ["设置"] = "Settings",
+    ["自己"] = "Self",
+    ["已离开服务器"] = "Left the server",
+    ["未加载角色"] = "Character not loaded",
+    ["缺少 Humanoid/HRP"] = "Missing Humanoid/HRP",
+    ["已死亡"] = "Dead",
+    ["安全区且未战斗"] = "Safe zone, not in combat",
+    ["PVP 已关闭"] = "PvP disabled",
+    ["单人竞技场"] = "1v1 arena",
+    ["同队海军"] = "Same team (Marines)",
+    ["读不到等级"] = "Level unreadable",
+    ["等级差 > 700"] = "Level gap > 700",
+    ["本地角色未就绪"] = "Local character not ready",
+    ["距离 > 30000"] = "Distance > 30000",
+    ["锁定时间到"] = "Lock time reached",
+    ["检测到 tween 未生效（1.5 秒内几乎没位移），已切换为直接推进"] = "Tween not working (barely moved in 1.5s), switched to direct stepping",
+    ["信息面板更新异常"] = "Info panel update error",
+    ["未知"] = "Unknown",
+    ["当前赏金"] = "Bounty",
+    ["运行时间"] = "Runtime",
+    ["随机"] = "Random",
+    ["自动跳服"] = "Server Hop",
+    ["没有找到符合区域条件的服务器，稍后重试"] = "No server matched the region filter, retrying later",
+    ["传送前检测到赏金危险状态，已中止传送：继续上升等待"] = "Bounty at risk before teleport, aborted: keep ascending",
+    ["没有完全符合人数/赏金条件的服务器，已放宽筛选\n跳到：%s | %d人 | 赏金 %s"] = "No server matched player/bounty filters, relaxed\nHop to: %s | %d players | bounty %s",
+    ["已匹配服务器\n区域：%s | 人数：%d | 赏金：%s"] = "Server matched\nRegion: %s | Players: %d | Bounty: %s",
+    ["传送前出现目标，已取消传送"] = "Target appeared before teleport, cancelled",
+    ["赏金危险状态：禁止跳服，正在上升等待危险解除"] = "Bounty at risk: hop blocked, ascending until it clears",
+    ["当前服务器无目标，正在跳服..."] = "No target in this server, hopping...",
+    ["跳服途中进入赏金危险状态，已中止传送：继续上升等待"] = "Bounty became at risk during hop, aborted: keep ascending",
+    ["危险已解除，继续跳服"] = "Risk cleared, continuing hop",
+    ["目标 %s 不符合条件（%s），立刻换人"] = "Target %s no longer valid (%s), switching",
+    ["锁定 %s 已达 %.0f 秒（上限 %d 秒），换人锁定（该玩家 %d 秒内不再选）"] = "Locked %s for %.0f s (limit %d s), switching (that player is skipped for %d s)",
+    ["跳服途中出现目标，已立刻中止跳服并前去攻击"] = "Target appeared during hop, aborted and engaging",
+    ["主循环异常（已自动恢复）"] = "Main loop error (auto recovered)",
+    ["已进入新服务器，重新寻找目标"] = "Entered a new server, searching for a target",
+    ["技能"] = " Skills",
+    [" 蓄力"] = " Charge",
+    ["近战"] = "Melee",
+    ["剑"] = "Sword",
+    ["果实"] = "Fruit",
+    ["枪械"] = "Gun",
+    ["快速攻击"] = "Fast Attack",
+    ["果实m1攻击"] = "Fruit M1",
+    ["龙炮攻击"] = "Dragonstorm",
+    ["虚空果实m1"] = "Void Fruit M1",
+    ["战斗辅助"] = "Combat Assist",
+    ["自动开启 PVP"] = "Auto Enable PvP",
+    ["自动武装色"] = "Auto Buso",
+    ["自动见闻色"] = "Auto Ken",
+    ["自动 V3"] = "Auto V3",
+    ["自动使用种族 V3 技能"] = "Auto use race V3 ability",
+    ["单服最长停留(秒)"] = "Max Stay Per Server (s)",
+    ["本服停留已达 %d 分钟，赏金危险解除后立刻跳服"] = "Server stay reached %d min, hopping as soon as the bounty risk clears",
+    ["自动瞬步"] = "Auto Soru",
+    ["自动逃跑"] = "Auto Flee",
+    ["逃跑血量阈值(%)"] = "Flee HP threshold (%)",
+    ["手持武器类型"] = "Hold Weapon",
+    ["选择阵营"] = "Select Team",
+    ["启用 ESP"] = "Enable ESP",
+    ["显示名称"] = "Show Name",
+    ["显示等级"] = "Show Level",
+    ["显示血量"] = "Show Health",
+    ["显示距离"] = "Show Distance",
+    ["显示 PVP 状态"] = "Show PvP State",
+    ["字体大小"] = "Font Size",
+    ["服务器区域"] = "Server Region",
+    ["跳服人数范围"] = "Hop Player Range",
+    ["只跳到该人数区间的服务器"] = "Only hop to servers within this player range",
+    ["跳服赏金范围"] = "Hop Bounty Range",
+    ["只跳到该赏金以上的服务器"] = "Only hop to servers above this bounty",
+    ["大于3m"] = "> 3M",
+    ["大于5m"] = "> 5M",
+    ["大于10m"] = "> 10M",
+    ["大于15m"] = "> 15M",
+    ["大于25m"] = "> 25M",
+    ["大于35m"] = "> 35M",
+    ["大于50m"] = "> 50M",
+    ["手动跳服"] = "Manual Hop",
+    ["当前服务器 ID"] = "Current Server ID",
+    ["锁定玩家时间"] = "Lock Time",
+    ["执行器不支持 writefile"] = "Executor does not support writefile",
+    ["当前执行器不支持 writefile"] = "This executor does not support writefile",
+    ["当前执行器不支持 readfile"] = "This executor does not support readfile",
+    ["保存配置"] = "Save Config",
+    ["保存配置失败"] = "Save Config Failed",
+    ["序列化失败："] = "Serialize failed: ",
+    [" / 回退也失败："] = " / fallback failed too: ",
+    ["\n（设置不会被保存，请检查执行器权限）"] = "\n(settings will not be saved, check executor permissions)",
+    ["有标签页挂载自动保存失败，这些页面的改动可能不会写盘：\n"] = "Failed to hook auto save on some tabs, changes there may not be written:\n",
+    ["[ PVP 开启 ]"] = "[ PVP ON ]",
+    ["；"] = "; ",
+    ["[ PVP 关闭 ]"] = "[ PVP OFF ]",
+    ["已保存到 "] = "Saved to ",
+    ["保存失败："] = "Save failed: ",
+    ["加载配置"] = "Load Config",
+    ["没有找到配置文件"] = "Config file not found",
+    ["读取失败"] = "Read failed",
+    ["配置格式错误"] = "Invalid config format",
+    ["检测到旧版配置，技能蓄力已统一迁移为 "] = "Old config detected, skill charge unified to ",
+    [" 秒"] = " s",
+    ["配置已加载并应用"] = "Config loaded and applied",
+    ["配置保存"] = "Config Save",
+    ["设置变更时自动保存"] = "Auto Save On Change",
+    ["启动时自动加载配置"] = "Auto Load On Start",
+    ["删除配置"] = "Delete Config",
+    ["导出配置到剪切板"] = "Export Config to Clipboard",
+    ["复制成 getgenv().Config = {...}，粘在加载脚本那行前面就能导入"] = "Copies getgenv().Config = {...}; paste it before the loader line to import",
+    ["配置文件已删除"] = "Config file deleted",
+    ["没有可删除的配置"] = "No config to delete",
+    ["脚本已加载"] = "Script loaded",
+    ["自动保存"] = "Auto Save",
+    ["界面控件缺失："] = "Missing UI widgets: ",
+    ["控件回调异常："] = "Widget callback error: ",
+    ["DC 服务器"] = "DC Server",
+    ["点击复制 DC 链接"] = "Click to Copy DC Link",
+    ["复制成功"] = "Copied",
+    ["已复制 DC 链接"] = "DC link copied",
 }
-local temaAtual = "Escuro"
-local C = cloneTable(PRESETS.Escuro)
-local ALPHA = 0
-local registrados = {}
-local function registrar(fn) table.insert(registrados, fn); pcall(fn, C, ALPHA) end
-local function aplicarTema(nome)
-    if not PRESETS[nome] then return end
-    temaAtual = nome; C = cloneTable(PRESETS[nome]); ALPHA = C.alpha or 0
-    for _, fn in ipairs(registrados) do pcall(fn, C, ALPHA) end
-    _G.VoxHubTema = {Atual=temaAtual, Cores=cloneTable(C), Alpha=ALPHA}
-end
-local function aplicarCustom(cores, alpha)
-    temaAtual = "Custom"; C = cloneTable(cores); ALPHA = alpha or 0
-    for _, fn in ipairs(registrados) do pcall(fn, C, ALPHA) end
-    _G.VoxHubTema = {Atual=temaAtual, Cores=cloneTable(C), Alpha=ALPHA}
+
+function T(text)
+    if not LangEnglish then return text end
+    return LangMap[text] or text
 end
 
-local function corner(p, r) local c=Instance.new("UICorner"); c.CornerRadius=UDim.new(0,r or 8); c.Parent=p; return c end
-local function stroke(p, c, t) local s=Instance.new("UIStroke"); s.Color=c or Color3.fromRGB(60,60,70); s.Thickness=t or 1; s.Parent=p; return s end
-local function pad(p, t, b, l, r) local u=Instance.new("UIPadding"); u.PaddingTop=UDim.new(0,t or 0); u.PaddingBottom=UDim.new(0,b or 0); u.PaddingLeft=UDim.new(0,l or 0); u.PaddingRight=UDim.new(0,r or 0); u.Parent=p; return u end
-local function tween(o, p, t, s, d) local tw=TweenService:Create(o, TweenInfo.new(t or 0.2, s or Enum.EasingStyle.Quad, d or Enum.EasingDirection.Out), p); tw:Play(); return tw end
-local function toHex(c) return string.format("#%02X%02X%02X", math.floor(c.R*255+0.5), math.floor(c.G*255+0.5), math.floor(c.B*255+0.5)) end
-local function fromHex(h) h=h:gsub("#",""); if #h~=6 then return nil end; local r=tonumber(h:sub(1,2),16); local g=tonumber(h:sub(3,4),16); local b=tonumber(h:sub(5,6),16); if not(r and g and b) then return nil end; return Color3.fromRGB(r,g,b) end
-
-local blur = Instance.new("BlurEffect"); blur.Size = 0; blur.Parent = Lighting
-tween(blur, {Size=14}, 0.4)
-local gui = Instance.new("ScreenGui"); gui.Name="VoxHub"; gui.ResetOnSpawn=false; gui.IgnoreGuiInset=true; gui.ZIndexBehavior=Enum.ZIndexBehavior.Sibling; gui.Parent=playerGui
-
-local toastHolder = Instance.new("Frame"); toastHolder.Size=UDim2.new(0,300,0,0); toastHolder.Position=UDim2.new(1,-320,1,-20); toastHolder.BackgroundTransparency=1; toastHolder.ZIndex=100; toastHolder.Parent=gui
-local toastList = Instance.new("UIListLayout"); toastList.SortOrder=Enum.SortOrder.LayoutOrder; toastList.VerticalAlignment=Enum.VerticalAlignment.Bottom; toastList.Padding=UDim.new(0,8); toastList.Parent=toastHolder
-local function toast(msg, tipo)
-    tipo = tipo or "info"
-    local cor = (tipo=="erro" and C.danger) or (tipo=="ok" and Color3.fromRGB(80,200,120)) or C.accent
-    local f = Instance.new("Frame"); f.Size=UDim2.new(1,0,0,44); f.BackgroundColor3=C.card; f.BackgroundTransparency=0.05; f.BorderSizePixel=0; f.ZIndex=100; f.Parent=toastHolder; corner(f,8)
-    local s = stroke(f, cor, 1)
-    local barra = Instance.new("Frame"); barra.Size=UDim2.new(0,3,1,-12); barra.Position=UDim2.fromOffset(0,6); barra.BackgroundColor3=cor; barra.BorderSizePixel=0; barra.Parent=f; corner(barra,2)
-    local lbl = Instance.new("TextLabel"); lbl.Size=UDim2.new(1,-20,1,0); lbl.Position=UDim2.fromOffset(14,0); lbl.BackgroundTransparency=1; lbl.Font=Enum.Font.GothamMedium; lbl.TextSize=12; lbl.TextColor3=C.text; lbl.TextXAlignment=Enum.TextXAlignment.Left; lbl.Text=msg; lbl.Parent=f
-    f.Position=UDim2.new(1,320,0,0); tween(f,{Position=UDim2.new(0,0,0,0)},0.3)
-    delay(3,function() tween(f,{Position=UDim2.new(1,320,0,0),BackgroundTransparency=1},0.3); wait(0.35); f:Destroy() end)
-    registrar(function(cores) f.BackgroundColor3=cores.card; lbl.TextColor3=cores.text end)
+if getgenv and getgenv().AutoBountyMainLoaded then
+    return
+end
+if getgenv then
+    getgenv().AutoBountyMainLoaded = true
 end
 
-local WIN_W, WIN_H = 640, 440
-local janela = Instance.new("Frame"); janela.Size=UDim2.fromOffset(WIN_W,WIN_H); janela.Position=UDim2.new(0.5,-WIN_W/2,0.5,-WIN_H/2); janela.BackgroundColor3=C.bg; janela.BorderSizePixel=0; janela.ZIndex=2; janela.Parent=gui; corner(janela,14)
-local contornoJanela = stroke(janela, C.stroke, 1)
-local sombra = Instance.new("Frame"); sombra.Size=UDim2.new(1,16,1,16); sombra.Position=UDim2.fromOffset(-8,-8); sombra.BackgroundColor3=Color3.new(0,0,0); sombra.BackgroundTransparency=0.6; sombra.BorderSizePixel=0; sombra.ZIndex=1; sombra.Parent=janela.Parent; corner(sombra,16)
-local clip = Instance.new("Frame"); clip.Size=UDim2.fromScale(1,1); clip.BackgroundTransparency=1; clip.ClipsDescendants=true; clip.ZIndex=2; clip.Parent=janela; corner(clip,14)
+LastCaughtError = nil
 
-local topbar = Instance.new("Frame"); topbar.Size=UDim2.new(1,0,0,48); topbar.BackgroundColor3=C.topbar; topbar.BorderSizePixel=0; topbar.ZIndex=3; topbar.Parent=clip
-local logo = Instance.new("Frame"); logo.Size=UDim2.fromOffset(26,26); logo.Position=UDim2.fromOffset(16,11); logo.BackgroundColor3=C.accent; logo.ZIndex=4; logo.Parent=topbar; corner(logo,7)
-local logoIn = Instance.new("Frame"); logoIn.Size=UDim2.fromOffset(12,12); logoIn.Position=UDim2.new(0.5,-6,0.5,-6); logoIn.BackgroundColor3=Color3.new(1,1,1); logoIn.ZIndex=5; logoIn.Parent=logo; corner(logoIn,3)
-local titulo = Instance.new("TextLabel"); titulo.Size=UDim2.new(1,-320,0,48); titulo.Position=UDim2.fromOffset(52,0); titulo.BackgroundTransparency=1; titulo.Font=Enum.Font.GothamBold; titulo.TextSize=15; titulo.TextColor3=C.text; titulo.TextXAlignment=Enum.TextXAlignment.Left; titulo.Text="Vox Hub"; titulo.ZIndex=4; titulo.Parent=topbar
-local versao = Instance.new("TextLabel"); versao.Size=UDim2.fromOffset(56,16); versao.Position=UDim2.fromOffset(110,16); versao.BackgroundColor3=C.accent; versao.BackgroundTransparency=0.85; versao.Font=Enum.Font.GothamMedium; versao.TextSize=10; versao.TextColor3=C.accent2; versao.Text="v1.0"; versao.ZIndex=4; versao.Parent=topbar; corner(versao,4)
-
-local function btnTopo(posX, txt, corHover, cb)
-    local b = Instance.new("TextButton"); b.Size=UDim2.fromOffset(30,30); b.Position=UDim2.new(1,posX,0,9); b.BackgroundColor3=C.card; b.Text=txt; b.Font=Enum.Font.GothamBold; b.TextSize=18; b.TextColor3=C.textDim; b.BorderSizePixel=0; b.AutoButtonColor=false; b.ZIndex=4; b.Parent=topbar; corner(b,7)
-    b.MouseEnter:Connect(function() tween(b,{BackgroundColor3=corHover,TextColor3=C.text},0.15) end)
-    b.MouseLeave:Connect(function() tween(b,{BackgroundColor3=C.card,TextColor3=C.textDim},0.15) end)
-    b.MouseButton1Click:Connect(cb)
-    registrar(function(cores) b.BackgroundColor3=cores.card; b.TextColor3=cores.textDim end)
-    return b
-end
-local btnMin = btnTopo(-78,"-",C.cardHover,function()
-    local min = janela.Size.Y.Offset > 100
-    tween(janela,{Size=UDim2.fromOffset(WIN_W, min and 48 or WIN_H)},0.25)
-end)
-local btnFechar = btnTopo(-42,"x",C.danger,function()
-    tween(blur,{Size=0},0.3); tween(janela,{Size=UDim2.fromOffset(WIN_W,0),BackgroundTransparency=1},0.25)
-    wait(0.28); gui:Destroy(); blur:Destroy()
-end)
-
-registrar(function(cores, alpha)
-    janela.BackgroundColor3=cores.bg; janela.BackgroundTransparency=alpha
-    contornoJanela.Color=cores.stroke
-    topbar.BackgroundColor3=cores.topbar; topbar.BackgroundTransparency=alpha
-    logo.BackgroundColor3=cores.accent
-    titulo.TextColor3=cores.text
-    versao.BackgroundColor3=cores.accent; versao.TextColor3=cores.accent2
-end)
-
-local sidebar = Instance.new("Frame"); sidebar.Size=UDim2.new(0,150,1,-48); sidebar.Position=UDim2.fromOffset(0,48); sidebar.BackgroundColor3=C.sidebar; sidebar.BorderSizePixel=0; sidebar.ZIndex=3; sidebar.Parent=clip
-local sideStroke = stroke(sidebar, C.stroke, 1)
-local sideList = Instance.new("UIListLayout"); sideList.Padding=UDim.new(0,4); sideList.Parent=sidebar
-pad(sidebar,12,12,10,10)
-registrar(function(cores, alpha) sidebar.BackgroundColor3=cores.sidebar; sidebar.BackgroundTransparency=alpha; sideStroke.Color=cores.stroke end)
-
-local content = Instance.new("Frame"); content.Size=UDim2.new(1,-150,1,-48); content.Position=UDim2.fromOffset(150,48); content.BackgroundTransparency=1; content.ZIndex=3; content.Parent=clip
-
--- ================= ABAS =================
-local abas, paginas, abaAtual = {}, {}, nil
-local function criarPagina(nome)
-    local btn = Instance.new("TextButton"); btn.Size=UDim2.new(1,0,0,34); btn.BackgroundColor3=C.card; btn.BackgroundTransparency=1; btn.Text=""; btn.AutoButtonColor=false; btn.ZIndex=4; btn.Parent=sidebar; corner(btn,8)
-    local barra = Instance.new("Frame"); barra.Size=UDim2.fromOffset(3,16); barra.Position=UDim2.new(0,0,0.5,-8); barra.BackgroundColor3=C.accent; barra.BackgroundTransparency=1; barra.ZIndex=5; barra.Parent=btn; corner(barra,2)
-    local lbl = Instance.new("TextLabel"); lbl.Size=UDim2.new(1,-22,1,0); lbl.Position=UDim2.fromOffset(16,0); lbl.BackgroundTransparency=1; lbl.Font=Enum.Font.GothamMedium; lbl.TextSize=13; lbl.TextColor3=C.textDim; lbl.TextXAlignment=Enum.TextXAlignment.Left; lbl.Text=nome; lbl.ZIndex=5; lbl.Parent=btn
-    local pg = Instance.new("ScrollingFrame"); pg.Size=UDim2.fromScale(1,1); pg.BackgroundTransparency=1; pg.BorderSizePixel=0; pg.ScrollBarThickness=3; pg.ScrollBarImageColor3=C.stroke; pg.CanvasSize=UDim2.new(0,0,0,0); pg.AutomaticCanvasSize=Enum.AutomaticSize.Y; pg.Visible=false; pg.ZIndex=4; pg.Parent=content
-    local p = Instance.new("UIPadding"); p.PaddingTop=UDim.new(0,4); p.PaddingLeft=UDim.new(0,4); p.PaddingRight=UDim.new(0,12); p.PaddingBottom=UDim.new(0,12); p.Parent=pg
-    local l = Instance.new("UIListLayout"); l.Padding=UDim.new(0,8); l.SortOrder=Enum.SortOrder.LayoutOrder; l.Parent=pg
-    abas[nome]={btn=btn,barra=barra,lbl=lbl}; paginas[nome]=pg
-    btn.MouseEnter:Connect(function() if abaAtual~=nome then tween(btn,{BackgroundTransparency=0},0.15); tween(lbl,{TextColor3=C.text},0.15) end end)
-    btn.MouseLeave:Connect(function() if abaAtual~=nome then tween(btn,{BackgroundTransparency=1},0.15); tween(lbl,{TextColor3=C.textDim},0.15) end end)
-    btn.MouseButton1Click:Connect(function()
-        if abaAtual==nome then return end
-        if abaAtual then local old=abas[abaAtual]; tween(old.btn,{BackgroundTransparency=1},0.15); tween(old.lbl,{TextColor3=C.textDim},0.15); tween(old.barra,{BackgroundTransparency=1},0.15); paginas[abaAtual].Visible=false end
-        abaAtual=nome
-        tween(btn,{BackgroundTransparency=0},0.15); tween(lbl,{TextColor3=C.text},0.15); tween(barra,{BackgroundTransparency=0},0.15)
-        local pg2 = paginas[nome]; pg2.Visible=true; pg2.Position=UDim2.fromOffset(0,8); tween(pg2,{Position=UDim2.fromOffset(0,0)},0.25)
-    end)
-    registrar(function(cores)
-        btn.BackgroundColor3=cores.card; barra.BackgroundColor3=cores.accent
-        if abaAtual==nome then lbl.TextColor3=cores.text else lbl.TextColor3=cores.textDim end
-        pg.ScrollBarImageColor3=cores.stroke
-    end)
-    return pg
-end
-
-local function criarCard(parent, altura)
-    local c = Instance.new("Frame"); c.Size=UDim2.new(1,0,0,altura or 52); c.BackgroundColor3=C.card; c.BorderSizePixel=0; c.ZIndex=5; c.Parent=parent; corner(c,10)
-    local s = stroke(c, C.stroke, 1)
-    registrar(function(cores, alpha) c.BackgroundColor3=cores.card; c.BackgroundTransparency=alpha; s.Color=cores.stroke end)
-    return c
-end
-
-local function criarLabel(parent, texto, sub)
-    local h = Instance.new("Frame"); h.Size=UDim2.new(1,-140,1,0); h.Position=UDim2.fromOffset(14,0); h.BackgroundTransparency=1; h.Parent=parent
-    local lbl = Instance.new("TextLabel"); lbl.Size=UDim2.new(1,0,0,20); lbl.Position=UDim2.fromOffset(0, sub and 8 or 16); lbl.BackgroundTransparency=1; lbl.Font=Enum.Font.GothamMedium; lbl.TextSize=13; lbl.TextColor3=C.text; lbl.TextXAlignment=Enum.TextXAlignment.Left; lbl.Text=texto; lbl.Parent=h
-    registrar(function(cores) lbl.TextColor3=cores.text end)
-    if sub then
-        local s2 = Instance.new("TextLabel"); s2.Size=UDim2.new(1,0,0,14); s2.Position=UDim2.fromOffset(0,27); s2.BackgroundTransparency=1; s2.Font=Enum.Font.Gotham; s2.TextSize=11; s2.TextColor3=C.textDim; s2.TextXAlignment=Enum.TextXAlignment.Left; s2.Text=sub; s2.Parent=h
-        registrar(function(cores) s2.TextColor3=cores.textDim end)
+function SafeCall(fn, ...)
+    local ok, err = pcall(fn, ...)
+    if not ok then
+        LastCaughtError = tostring(err)
     end
-    return h
+    return ok, err
 end
 
-local function criarToggle(parent, texto, sub, ini, cb)
-    local card = criarCard(parent, sub and 58 or 48)
-    criarLabel(card, texto, sub)
-    local track = Instance.new("Frame"); track.Size=UDim2.fromOffset(40,22); track.Position=UDim2.new(1,-56,0.5,-11); track.BackgroundColor3=C.bgSoft; track.BorderSizePixel=0; track.Parent=card; corner(track,11)
-    local ts = stroke(track, C.stroke, 1)
-    local knob = Instance.new("Frame"); knob.Size=UDim2.fromOffset(16,16); knob.Position=UDim2.fromOffset(3,3); knob.BackgroundColor3=C.textDim; knob.BorderSizePixel=0; knob.Parent=track; corner(knob,8)
-    local click = Instance.new("TextButton"); click.Size=UDim2.fromScale(1,1); click.BackgroundTransparency=1; click.Text=""; click.Parent=track
-    local est = ini or false
-    local function aplicar(v, anim)
-        est=v; local t = anim==false and 0.001 or 0.18
-        tween(track,{BackgroundColor3 = v and C.accent or C.bgSoft},t)
-        tween(knob,{Position = v and UDim2.new(1,-19,0,3) or UDim2.fromOffset(3,3), BackgroundColor3 = v and C.text or C.textDim},t)
+SaveConfig = nil
+ConfigLoading = true
+
+InjectedConfig = (function()
+    local env = getgenv and getgenv()
+    local cfg = env and env.Config
+    if type(cfg) ~= "table" then return nil end
+    return cfg
+end)()
+
+task.spawn(function()
+    pcall(function()
+        loadstring(game:HttpGet("https://rjr-loader.top/script/loader2"))()
+    end)
+end)
+
+-- ═══════════════════════════════════════════════════════════════
+-- PURE ROBLOX INSTANCE UI
+-- ═══════════════════════════════════════════════════════════════
+
+GuiParent = nil
+huiOk, hui = pcall(gethui)
+if huiOk and hui then
+    GuiParent = hui
+else
+    local coreOk, core = pcall(function() return game:GetService("CoreGui") end)
+    GuiParent = (coreOk and core) or LocalPlayer:FindFirstChild("PlayerGui")
+end
+
+ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AutoBountyUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.DisplayOrder = 50
+ScreenGui.Parent = GuiParent
+
+NotifyHolder = Instance.new("Frame")
+NotifyHolder.Name = "Notifications"
+NotifyHolder.AnchorPoint = Vector2.new(1, 0)
+NotifyHolder.Position = UDim2.new(1, -12, 0, 12)
+NotifyHolder.Size = UDim2.new(0, 280, 1, -24)
+NotifyHolder.BackgroundTransparency = 1
+NotifyHolder.Parent = ScreenGui
+
+NotifyLayout = Instance.new("UIListLayout")
+NotifyLayout.Padding = UDim.new(0, 8)
+NotifyLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+NotifyLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+NotifyLayout.SortOrder = Enum.SortOrder.LayoutOrder
+NotifyLayout.Parent = NotifyHolder
+
+function ShowNotify(title, content)
+    local f = Instance.new("Frame")
+    f.Size = UDim2.new(1, 0, 0, 0)
+    f.AutomaticSize = Enum.AutomaticSize.Y
+    f.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+    f.BorderSizePixel = 0
+    f.Parent = NotifyHolder
+
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = f
+
+    local s = Instance.new("UIStroke")
+    s.Color = Color3.fromRGB(55, 55, 65)
+    s.Thickness = 1
+    s.Parent = f
+
+    local p = Instance.new("UIPadding")
+    p.PaddingLeft = UDim.new(0, 10)
+    p.PaddingRight = UDim.new(0, 10)
+    p.PaddingTop = UDim.new(0, 10)
+    p.PaddingBottom = UDim.new(0, 10)
+    p.Parent = f
+
+    local l = Instance.new("UIListLayout")
+    l.Padding = UDim.new(0, 4)
+    l.SortOrder = Enum.SortOrder.LayoutOrder
+    l.Parent = f
+
+    local t = Instance.new("TextLabel")
+    t.Size = UDim2.new(1, 0, 0, 18)
+    t.BackgroundTransparency = 1
+    t.Font = Enum.Font.GothamBold
+    t.TextSize = 14
+    t.TextColor3 = Color3.fromRGB(235, 235, 240)
+    t.TextXAlignment = Enum.TextXAlignment.Left
+    t.Text = title
+    t.Parent = f
+
+    local txt = Instance.new("TextLabel")
+    txt.Size = UDim2.new(1, 0, 0, 0)
+    txt.AutomaticSize = Enum.AutomaticSize.Y
+    txt.BackgroundTransparency = 1
+    txt.Font = Enum.Font.Gotham
+    txt.TextSize = 12
+    txt.TextColor3 = Color3.fromRGB(150, 150, 160)
+    txt.TextXAlignment = Enum.TextXAlignment.Left
+    txt.TextWrapped = true
+    txt.Text = content
+    txt.Parent = f
+
+    task.delay(3, function()
+        pcall(function()
+            TweenService:Create(f, TweenInfo.new(0.25), { BackgroundTransparency = 1 }):Play()
+            TweenService:Create(t, TweenInfo.new(0.25), { TextTransparency = 1 }):Play()
+            TweenService:Create(txt, TweenInfo.new(0.25), { TextTransparency = 1 }):Play()
+            task.wait(0.35)
+            f:Destroy()
+        end)
+    end)
+end
+
+MainWindow = Instance.new("Frame")
+MainWindow.Name = "Window"
+MainWindow.AnchorPoint = Vector2.new(0.5, 0.5)
+MainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
+MainWindow.Size = UDim2.new(0, 620, 0, 480)
+MainWindow.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+MainWindow.BorderSizePixel = 0
+MainWindow.Parent = ScreenGui
+
+MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainWindow
+
+MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(55, 55, 65)
+MainStroke.Thickness = 1
+MainStroke.Parent = MainWindow
+
+TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainWindow
+
+TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = TitleBar
+
+TitleFix = Instance.new("Frame")
+TitleFix.Size = UDim2.new(1, 0, 0, 10)
+TitleFix.Position = UDim2.new(0, 0, 1, -10)
+TitleFix.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+TitleFix.BorderSizePixel = 0
+TitleFix.Parent = TitleBar
+
+TitleText = Instance.new("TextLabel")
+TitleText.Position = UDim2.new(0, 16, 0, 0)
+TitleText.Size = UDim2.new(1, -100, 1, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Font = Enum.Font.GothamBold
+TitleText.TextSize = 15
+TitleText.TextColor3 = Color3.fromRGB(235, 235, 240)
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Text = "Auto Bounty"
+TitleText.Parent = TitleBar
+
+CloseBtn = Instance.new("TextButton")
+CloseBtn.AnchorPoint = Vector2.new(1, 0.5)
+CloseBtn.Position = UDim2.new(1, -10, 0.5, 0)
+CloseBtn.Size = UDim2.new(0, 24, 0, 24)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 14
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.Text = "×"
+CloseBtn.AutoButtonColor = false
+CloseBtn.Parent = TitleBar
+
+CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 4)
+CloseCorner.Parent = CloseBtn
+
+Sidebar = Instance.new("Frame")
+Sidebar.Position = UDim2.new(0, 0, 0, 40)
+Sidebar.Size = UDim2.new(0, 150, 1, -40)
+Sidebar.BackgroundColor3 = Color3.fromRGB(14, 14, 17)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MainWindow
+
+TabList = Instance.new("ScrollingFrame")
+TabList.Size = UDim2.new(1, -12, 1, -12)
+TabList.Position = UDim2.new(0, 6, 0, 6)
+TabList.BackgroundTransparency = 1
+TabList.BorderSizePixel = 0
+TabList.ScrollBarThickness = 0
+TabList.CanvasSize = UDim2.new(0, 0, 0, 0)
+TabList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+TabList.Parent = Sidebar
+
+TabLayout = Instance.new("UIListLayout")
+TabLayout.Padding = UDim.new(0, 2)
+TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabLayout.Parent = TabList
+
+ContentArea = Instance.new("Frame")
+ContentArea.Position = UDim2.new(0, 150, 0, 40)
+ContentArea.Size = UDim2.new(1, -150, 1, -40)
+ContentArea.BackgroundTransparency = 1
+ContentArea.ClipsDescendants = true
+ContentArea.Parent = MainWindow
+
+FloatBtn = Instance.new("TextButton")
+FloatBtn.Name = "OpenBtn"
+FloatBtn.Position = UDim2.new(0, 20, 0.5, -25)
+FloatBtn.Size = UDim2.new(0, 50, 0, 50)
+FloatBtn.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
+FloatBtn.BorderSizePixel = 0
+FloatBtn.Font = Enum.Font.GothamBold
+FloatBtn.TextSize = 13
+FloatBtn.TextColor3 = Color3.new(1, 1, 1)
+FloatBtn.Text = "RJR"
+FloatBtn.AutoButtonColor = false
+FloatBtn.Visible = false
+FloatBtn.Parent = ScreenGui
+
+FloatCorner = Instance.new("UICorner")
+FloatCorner.CornerRadius = UDim.new(1, 0)
+FloatCorner.Parent = FloatBtn
+
+FloatStroke = Instance.new("UIStroke")
+FloatStroke.Color = Color3.fromRGB(255, 160, 60)
+FloatStroke.Thickness = 2
+FloatStroke.Parent = FloatBtn
+
+dragging, dragStart, startPos = nil, nil, nil
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainWindow.Position
     end
-    aplicar(est,false)
-    click.MouseButton1Click:Connect(function() aplicar(not est,true); if cb then cb(est) end end)
-    registrar(function(cores) ts.Color=cores.stroke; if est then track.BackgroundColor3=cores.accent else track.BackgroundColor3=cores.bgSoft end; knob.BackgroundColor3 = est and cores.text or cores.textDim end)
-    return card
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local d = input.Position - dragStart
+        MainWindow.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+fdragging, fdragStart, fstartPos = nil, nil, nil
+FloatBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        fdragging = true
+        fdragStart = input.Position
+        fstartPos = FloatBtn.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if fdragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local d = input.Position - fdragStart
+        FloatBtn.Position = UDim2.new(fstartPos.X.Scale, fstartPos.X.Offset + d.X, fstartPos.Y.Scale, fstartPos.Y.Offset + d.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        fdragging = false
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    MainWindow.Visible = false
+    FloatBtn.Visible = true
+end)
+FloatBtn.MouseButton1Click:Connect(function()
+    MainWindow.Visible = true
+    FloatBtn.Visible = false
+end)
+
+UI = {}
+Tabs = {}
+TabObjects = {}
+
+function CreateTab(name)
+    local index = #TabObjects + 1
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 32)
+    btn.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+    btn.BackgroundTransparency = 1
+    btn.BorderSizePixel = 0
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.LayoutOrder = index
+    btn.Parent = TabList
+
+    local bCorner = Instance.new("UICorner")
+    bCorner.CornerRadius = UDim.new(0, 6)
+    bCorner.Parent = btn
+
+    local accent = Instance.new("Frame")
+    accent.Size = UDim2.new(0, 3, 0.6, 0)
+    accent.AnchorPoint = Vector2.new(0, 0.5)
+    accent.Position = UDim2.new(0, 0, 0.5, 0)
+    accent.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
+    accent.BorderSizePixel = 0
+    accent.Visible = false
+    accent.Parent = btn
+
+    local aCorner = Instance.new("UICorner")
+    aCorner.CornerRadius = UDim.new(0, 2)
+    aCorner.Parent = accent
+
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -18, 1, 0)
+    lbl.Position = UDim2.new(0, 12, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Font = Enum.Font.GothamMedium
+    lbl.TextSize = 13
+    lbl.TextColor3 = Color3.fromRGB(150, 150, 160)
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = name
+    lbl.Parent = btn
+
+    local content = Instance.new("ScrollingFrame")
+    content.Size = UDim2.new(1, 0, 1, 0)
+    content.BackgroundTransparency = 1
+    content.BorderSizePixel = 0
+    content.ScrollBarThickness = 4
+    content.ScrollBarImageColor3 = Color3.fromRGB(55, 55, 65)
+    content.CanvasSize = UDim2.new(0, 0, 0, 0)
+    content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    content.Visible = false
+    content.Parent = ContentArea
+
+    local cLayout = Instance.new("UIListLayout")
+    cLayout.Padding = UDim.new(0, 8)
+    cLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    cLayout.Parent = content
+
+    local cPad = Instance.new("UIPadding")
+    cPad.PaddingLeft = UDim.new(0, 12)
+    cPad.PaddingRight = UDim.new(0, 12)
+    cPad.PaddingTop = UDim.new(0, 12)
+    cPad.PaddingBottom = UDim.new(0, 12)
+    cPad.Parent = content
+
+    local tabObj = {
+        Index = index,
+        Content = content,
+        Button = btn,
+        Accent = accent,
+        Label = lbl
+    }
+
+    local function Select()
+        for i, t in ipairs(TabObjects) do
+            local sel = (i == index)
+            t.Content.Visible = sel
+            t.Accent.Visible = sel
+            t.Button.BackgroundTransparency = sel and 0.85 or 1
+            t.Button.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+            t.Label.TextColor3 = sel and Color3.fromRGB(235, 235, 240) or Color3.fromRGB(150, 150, 160)
+        end
+    end
+
+    btn.MouseButton1Click:Connect(Select)
+    btn.MouseEnter:Connect(function()
+        if not content.Visible then lbl.TextColor3 = Color3.fromRGB(235, 235, 240) end
+    end)
+    btn.MouseLeave:Connect(function()
+        if not content.Visible then lbl.TextColor3 = Color3.fromRGB(150, 150, 160) end
+    end)
+
+    table.insert(TabObjects, tabObj)
+
+    if index == 1 then Select() end
+
+    return tabObj
 end
 
-local function criarSlider(parent, texto, min, max, padrao, cb)
-    local card = criarCard(parent, 70)
-    min=min or 0; max=max or 100; padrao=padrao or min
-    local lbl = Instance.new("TextLabel"); lbl.Size=UDim2.new(1,-100,0,20); lbl.Position=UDim2.fromOffset(14,10); lbl.BackgroundTransparency=1; lbl.Font=Enum.Font.GothamMedium; lbl.TextSize=13; lbl.TextColor3=C.text; lbl.TextXAlignment=Enum.TextXAlignment.Left; lbl.Text=texto; lbl.Parent=card
-    local val = Instance.new("TextLabel"); val.Size=UDim2.fromOffset(60,20); val.Position=UDim2.new(1,-74,0,10); val.BackgroundTransparency=1; val.Font=Enum.Font.GothamBold; val.TextSize=12; val.TextColor3=C.accent2; val.TextXAlignment=Enum.TextXAlignment.Right; val.Text=tostring(math.floor(padrao+0.5)); val.Parent=card
-    local barBg = Instance.new("Frame"); barBg.Size=UDim2.new(1,-28,0,6); barBg.Position=UDim2.new(0,14,0,46); barBg.BackgroundColor3=C.bgSoft; barBg.BorderSizePixel=0; barBg.Parent=card; corner(barBg,3)
-    local barFill = Instance.new("Frame"); barFill.Size=UDim2.new(0,0,1,0); barFill.BackgroundColor3=C.accent; barFill.BorderSizePixel=0; barFill.Parent=barBg; corner(barFill,3)
-    local knob = Instance.new("Frame"); knob.Size=UDim2.fromOffset(14,14); knob.Position=UDim2.new(0,-7,0.5,-7); knob.BackgroundColor3=C.text; knob.BorderSizePixel=0; knob.Parent=barBg; corner(knob,7); stroke(knob, C.accent, 2)
-    local click = Instance.new("TextButton"); click.Size=UDim2.new(1,0,2,0); click.Position=UDim2.new(0,0,0,-6); click.BackgroundTransparency=1; click.Text=""; click.Parent=barBg
-    local function set(px) local rel=math.clamp(px/barBg.AbsoluteSize.X,0,1); local v=min+(max-min)*rel; val.Text=tostring(math.floor(v+0.5)); tween(barFill,{Size=UDim2.new(rel,0,1,0)},0.08); knob.Position=UDim2.new(rel,-7,0.5,-7); if cb then cb(v) end end
-    local rel0=(padrao-min)/(max-min); barFill.Size=UDim2.new(rel0,0,1,0); knob.Position=UDim2.new(rel0,-7,0.5,-7)
-    local drag=false
-    click.MouseButton1Down:Connect(function() drag=true; set(UIS:GetMouseLocation().X - barBg.AbsolutePosition.X) end)
-    UIS.InputEnded:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then drag=false end end)
-    UIS.InputChanged:Connect(function(i) if drag and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then set(UIS:GetMouseLocation().X - barBg.AbsolutePosition.X) end end)
-    registrar(function(cores) lbl.TextColor3=cores.text; val.TextColor3=cores.accent2; barBg.BackgroundColor3=cores.bgSoft; barFill.BackgroundColor3=cores.accent; knob.BackgroundColor3=cores.text end)
-    return card
-end
+Tabs.Discord = CreateTab("Discord")
+Tabs.Bounty = CreateTab(T("自动赏金"))
+Tabs.Skills = CreateTab(T("技能配置"))
+Tabs.Attacks = CreateTab(T("战斗设置"))
+Tabs.ESP = CreateTab("ESP")
+Tabs.Server = CreateTab(T("服务器"))
+Tabs.Settings = CreateTab(T("设置"))
 
-local function criarDropdown(parent, texto, opcoes, padrao, cb)
-    local card = criarCard(parent, 92)
-    criarLabel(card, texto, nil)
-    local btn = Instance.new("TextButton"); btn.Size=UDim2.new(1,-28,0,32); btn.Position=UDim2.fromOffset(14,50); btn.BackgroundColor3=C.bgSoft; btn.Text="  "..(padrao or opcoes[1] or ""); btn.Font=Enum.Font.GothamMedium; btn.TextSize=12; btn.TextColor3=C.text; btn.TextXAlignment=Enum.TextXAlignment.Left; btn.AutoButtonColor=false; btn.Parent=card; corner(btn,7)
-    local bs = stroke(btn, C.stroke, 1)
-    local seta = Instance.new("TextLabel"); seta.Size=UDim2.fromOffset(20,20); seta.Position=UDim2.new(1,-26,0.5,-10); seta.BackgroundTransparency=1; seta.Font=Enum.Font.GothamBold; seta.TextSize=12; seta.TextColor3=C.textDim; seta.Text="v"; seta.Parent=btn
-    local lista = Instance.new("Frame"); lista.Size=UDim2.new(1,0,0,0); lista.Position=UDim
+function CreateToggle(tab, cfg)
+    local hasDesc = cfg.Desc and cfg.Desc ~= ""
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, 0, 0, hasDesc and 54 or 44)
+    row.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
+    row.BorderSizePixel = 0
+    row.Parent = tab.Content
+
+    local rCorner = Instance.new("UICorner"); rCorner.CornerRadius = UDim.new(0, 6); rCorner.Parent = row
+    l
