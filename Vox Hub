@@ -1,331 +1,386 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
-local mainTheme = Color3.fromRGB(25, 20, 40)
-local accent = Color3.fromRGB(140, 80, 255)
-local accentDim = Color3.fromRGB(80, 50, 160)
-local textWhite = Color3.fromRGB(255, 255, 255)
-local textGray = Color3.fromRGB(180, 175, 200)
-local toggleOff = Color3.fromRGB(50, 45, 70)
+-- Cores do Tema
+local Colors = {
+    Background = Color3.fromRGB(19, 21, 26),
+    Sidebar = Color3.fromRGB(26, 28, 35),
+    Card = Color3.fromRGB(26, 28, 35),
+    Border = Color3.fromRGB(42, 45, 53),
+    TextWhite = Color3.fromRGB(255, 255, 255),
+    TextGray = Color3.fromRGB(102, 102, 102),
+    ToggleOff = Color3.fromRGB(42, 45, 53),
+    ToggleOn = Color3.fromRGB(255, 255, 255),
+}
 
--- GUI
-local gui = Instance.new("ScreenGui")
-gui.Name = "VoxHub"
-gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
+-- =======================================================
+-- 1. CRIAR O BOTÃO FLUTUANTE (TOPO ESQUERDO)
+-- =======================================================
+local floatingBtn = Instance.new("TextButton")
+floatingBtn.Name = "FloatingBtn"
+floatingBtn.Parent = playerGui
+floatingBtn.Size = UDim2.new(0, 50, 0, 50)
+floatingBtn.Position = UDim2.new(0, 20, 0, 20)
+floatingBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+floatingBtn.BackgroundTransparency = 0.4
+floatingBtn.BorderSizePixel = 1
+floatingBtn.BorderColor3 = Colors.Border
+floatingBtn.Text = "≡"
+floatingBtn.TextColor3 = Colors.TextWhite
+floatingBtn.TextSize = 24
+floatingBtn.Font = Enum.Font.GothamBold
+floatingBtn.AutoButtonColor = false
+floatingBtn.ZIndex = 10
 
-local main = Instance.new("Frame")
-main.Name = "Main"
-main.Size = UDim2.new(0, 340, 0, 420)
-main.Position = UDim2.new(0.5, -170, 0.5, -210)
-main.BackgroundColor3 = mainTheme
-main.BorderSizePixel = 0
-main.Active = true
-main.Draggable = false
-main.Parent = gui
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = floatingBtn
 
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 12)
-mainCorner.Parent = main
+-- =======================================================
+-- 2. CRIAR O CONTAINER PRINCIPAL DO MENU
+-- =======================================================
+local menu = Instance.new("Frame")
+menu.Name = "Menu"
+menu.Parent = playerGui
+menu.Size = UDim2.new(0, 550, 0, 400)
+menu.Position = UDim2.new(0, 80, 0, 80)
+menu.BackgroundColor3 = Colors.Background
+menu.BorderSizePixel = 1
+menu.BorderColor3 = Colors.Border
+menu.Visible = false
+menu.ZIndex = 5
 
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = accentDim
-mainStroke.Thickness = 1
-mainStroke.Parent = main
+local menuCorner = Instance.new("UICorner")
+menuCorner.CornerRadius = UDim.new(0, 16)
+menuCorner.Parent = menu
 
--- Layout
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 8)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Parent = main
+-- =======================================================
+-- 3. CRIAR SIDEBAR (ESQUERDA)
+-- =======================================================
+local sidebar = Instance.new("Frame")
+sidebar.Name = "Sidebar"
+sidebar.Parent = menu
+sidebar.Size = UDim2.new(0, 180, 1, 0)
+sidebar.BackgroundColor3 = Colors.Sidebar
+sidebar.BorderSizePixel = 0
+sidebar.ZIndex = 6
 
-local padding = Instance.new("UIPadding")
-padding.PaddingTop = UDim.new(0, 12)
-padding.PaddingLeft = UDim.new(0, 12)
-padding.PaddingRight = UDim.new(0, 12)
-padding.PaddingBottom = UDim.new(0, 12)
-padding.Parent = main
+local sidebarCorner = Instance.new("UICorner")
+sidebarCorner.CornerRadius = UDim.new(0, 16)
+sidebarCorner.Parent = sidebar
 
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 40)
-titleBar.BackgroundTransparency = 1
-titleBar.LayoutOrder = 1
-titleBar.Parent = main
+-- Logo
+local logo = Instance.new("TextLabel")
+logo.Parent = sidebar
+logo.Size = UDim2.new(1, -20, 0, 30)
+logo.Position = UDim2.new(0, 10, 0, 10)
+logo.BackgroundTransparency = 1
+logo.Text = "FARM"
+logo.TextColor3 = Colors.TextWhite
+logo.TextSize = 14
+logo.Font = Enum.Font.GothamBold
+logo.TextXAlignment = Enum.TextXAlignment.Left
+logo.ZIndex = 7
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0, 120, 1, 0)
-title.Position = UDim2.new(0, 0, 0.5, -14)
-title.BackgroundTransparency = 1
-title.Text = "VOX HUB"
-title.TextColor3 = accent
-title.TextSize = 20
-title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = titleBar
+-- Barra de Pesquisa
+local searchBar = Instance.new("Frame")
+searchBar.Parent = sidebar
+searchBar.Size = UDim2.new(1, -20, 0, 30)
+searchBar.Position = UDim2.new(0, 10, 0, 50)
+searchBar.BackgroundColor3 = Colors.Background
+searchBar.BorderSizePixel = 1
+searchBar.BorderColor3 = Colors.Border
+searchBar.ZIndex = 7
 
-local version = Instance.new("TextLabel")
-version.Size = UDim2.new(0, 60, 1, 0)
-version.Position = UDim2.new(1, -60, 0.5, -12)
-version.BackgroundTransparency = 1
-version.Text = "v1.0"
-version.TextColor3 = textGray
-version.TextSize = 12
-version.Font = Enum.Font.Gotham
-version.TextXAlignment = Enum.TextXAlignment.Right
-version.Parent = titleBar
+local searchCorner = Instance.new("UICorner")
+searchCorner.CornerRadius = UDim.new(0, 8)
+searchCorner.Parent = searchBar
 
-local tabFrame = Instance.new("Frame")
-tabFrame.Size = UDim2.new(1, 0, 0, 36)
-tabFrame.BackgroundTransparency = 1
-tabFrame.LayoutOrder = 2
-tabFrame.Parent = main
+local searchText = Instance.new("TextLabel")
+searchText.Parent = searchBar
+searchText.Size = UDim2.new(1, -10, 1, 0)
+searchText.Position = UDim2.new(0, 10, 0, 0)
+searchText.BackgroundTransparency = 1
+searchText.Text = "🔍 Search..."
+searchText.TextColor3 = Colors.TextGray
+searchText.TextSize = 12
+searchText.Font = Enum.Font.Gotham
+searchText.TextXAlignment = Enum.TextXAlignment.Left
+searchText.ZIndex = 8
 
-local tabLayout = Instance.new("UIListLayout")
-tabLayout.FillDirection = Enum.FillDirection.Horizontal
-tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-tabLayout.Padding = UDim.new(0, 6)
-tabLayout.Parent = tabFrame
+-- Navegação
+local navFrame = Instance.new("Frame")
+navFrame.Parent = sidebar
+navFrame.Size = UDim2.new(1, -20, 1, -110)
+navFrame.Position = UDim2.new(0, 10, 0, 90)
+navFrame.BackgroundTransparency = 1
+navFrame.ZIndex = 7
 
-local tabs = {"Home", "Combat", "Config"}
-local tabButtons = {}
-local contentFrames = {}
+local navLayout = Instance.new("UIListLayout")
+navLayout.Parent = navFrame
+navLayout.SortOrder = Enum.SortOrder.LayoutOrder
+navLayout.Padding = UDim.new(0, 2)
 
-for i, tabName in ipairs(tabs) do
+local function createNavItem(text, isActive)
     local btn = Instance.new("TextButton")
-    btn.Name = tabName
-    btn.Size = UDim2.new(0, 90, 0, 30)
-    btn.BackgroundColor3 = i == 1 and accentDim or toggleOff
-    btn.Text = tabName
-    btn.TextColor3 = textWhite
-    btn.TextSize = 13
-    btn.Font = Enum.Font.GothamMedium
-    btn.BorderSizePixel = 0
-    btn.LayoutOrder = i
-    btn.Parent = tabFrame
-
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 8)
-    c.Parent = btn
-
-    tabButtons[tabName] = btn
-end
-
-local content = Instance.new("Frame")
-content.Size = UDim2.new(1, 0, 1, -86)
-content.Position = UDim2.new(0, 0, 0, 86)
-content.BackgroundTransparency = 1
-content.Parent = main
-
-local pageLayout = Instance.new("UIListLayout")
-pageLayout.Padding = UDim.new(0, 6)
-pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-pageLayout.Parent = content
-
--- Helper: criar toggle
-local function makeToggle(parent, order, label)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, 36)
-    frame.BackgroundColor3 = toggleOff
-    frame.BorderSizePixel = 0
-    frame.LayoutOrder = order
-    frame.Parent = parent
-
-    local fc = Instance.new("UICorner")
-    fc.CornerRadius = UDim.new(0, 8)
-    fc.Parent = frame
-
-    local label2 = Instance.new("TextLabel")
-    label2.Size = UDim2.new(0, 200, 1, 0)
-    label2.Position = UDim2.new(0, 12, 0, 0)
-    label2.BackgroundTransparency = 1
-    label2.Text = label
-    label2.TextColor3 = textWhite
-    label2.TextSize = 13
-    label2.Font = Enum.Font.Gotham
-    label2.TextXAlignment = Enum.TextXAlignment.Left
-    label2.Parent = frame
-
-    local toggle = Instance.new("TextButton")
-    toggle.Size = UDim2.new(0, 50, 0, 24)
-    toggle.Position = UDim2.new(1, -62, 0.5, -12)
-    toggle.BackgroundColor3 = accent
-    toggle.Text = "ON"
-    toggle.TextColor3 = textWhite
-    toggle.TextSize = 11
-    toggle.Font = Enum.Font.GothamBold
-    toggle.BorderSizePixel = 0
-    toggle.Parent = frame
-
-    local tc = Instance.new("UICorner")
-    tc.CornerRadius = UDim.new(0, 6)
-    tc.Parent = toggle
-
-    local isOn = true
-    toggle.MouseButton1Click:Connect(function()
-        isOn = not isOn
-        toggle.Text = isOn and "ON" or "OFF"
-        toggle.BackgroundColor3 = isOn and accent or Color3.fromRGB(40, 35, 55)
-    end)
-
-    return frame
-end
-
--- Helper: criar botão simples
-local function makeButton(parent, order, label)
-    local btn = Instance.new("TextButton")
+    btn.Parent = navFrame
     btn.Size = UDim2.new(1, 0, 0, 36)
-    btn.BackgroundColor3 = toggleOff
-    btn.Text = label
-    btn.TextColor3 = textWhite
-    btn.TextSize = 13
-    btn.Font = Enum.Font.Gotham
+    btn.BackgroundColor3 = isActive and Colors.Card or Color3.fromRGB(26, 28, 35)
+    btn.BackgroundTransparency = isActive and 0 or 1
     btn.BorderSizePixel = 0
-    btn.LayoutOrder = order
-    btn.Parent = parent
+    btn.Text = ""
+    btn.ZIndex = 8
+    
+    local itemCorner = Instance.new("UICorner")
+    itemCorner.CornerRadius = UDim.new(0, 6)
+    itemCorner.Parent = btn
 
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, 8)
-    c.Parent = btn
-
-    btn.MouseButton1Click:Connect(function()
-        btn.BackgroundColor3 = accentDim
-        task.delay(0.15, function()
-            btn.BackgroundColor3 = toggleOff
-        end)
-    end)
-
-    return btn
+    local label = Instance.new("TextLabel")
+    label.Parent = btn
+    label.Size = UDim2.new(1, -20, 1, 0)
+    label.Position = UDim2.new(0, 15, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = isActive and Colors.TextWhite or Colors.TextGray
+    label.TextSize = 13
+    label.Font = Enum.Font.GothamMedium
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.ZIndex = 9
+    
+    if isActive then
+        local indicator = Instance.new("Frame")
+        indicator.Parent = btn
+        indicator.Size = UDim2.new(0, 3, 1, 0)
+        indicator.Position = UDim2.new(0, 0, 0, 0)
+        indicator.BackgroundColor3 = Colors.TextWhite
+        indicator.BorderSizePixel = 0
+        indicator.ZIndex = 9
+        
+        local indCorner = Instance.new("UICorner")
+        indCorner.CornerRadius = UDim.new(0, 2)
+        indCorner.Parent = indicator
+    end
 end
 
-local homePage = Instance.new("Frame")
-homePage.Name = "Home"
-homePage.Size = UDim2.new(1, 0, 1, 0)
-homePage.BackgroundTransparency = 1
-homePage.LayoutOrder = 1
-homePage.Parent = content
+createNavItem("Status", false)
+createNavItem("Farm Settings", false)
+createNavItem("Main", true)
+createNavItem("Multi Farm", false)
+createNavItem("Quests", false)
+createNavItem("Items", false)
 
-local homeLayout = Instance.new("UIListLayout")
-homeLayout.Padding = UDim.new(0, 6)
-homeLayout.SortOrder = Enum.SortOrder.LayoutOrder
-homeLayout.Parent = homePage
+-- =======================================================
+-- 4. CONTEÚDO DIREITO
+-- =======================================================
+local content = Instance.new("Frame")
+content.Parent = menu
+content.Size = UDim2.new(1, -180, 1, 0)
+content.Position = UDim2.new(0, 180, 0, 0)
+content.BackgroundTransparency = 1
+content.ZIndex = 6
 
-makeToggle(homePage, 1, "Auto Farm")
-makeToggle(homePage, 2, "Auto Raid")
-makeToggle(homePage, 3, "Auto Quest")
-makeButton(homePage, 4, "Teleport to Island")
-makeButton(homePage, 5, "Reset Stamina")
+-- Cabeçalho
+local header = Instance.new("TextLabel")
+header.Parent = content
+header.Size = UDim2.new(1, -40, 0, 40)
+header.Position = UDim2.new(0, 20, 0, 20)
+header.BackgroundTransparency = 1
+header.Text = "🏠 Main\nFarming and Progression"
+header.TextColor3 = Colors.TextWhite
+header.TextSize = 14
+header.Font = Enum.Font.GothamBold
+header.TextXAlignment = Enum.TextXAlignment.Left
+header.TextYAlignment = Enum.TextYAlignment.Top
+header.ZIndex = 7
 
-local combatPage = Instance.new("Frame")
-combatPage.Name = "Combat"
-combatPage.Size = UDim2.new(1, 0, 1, 0)
-combatPage.BackgroundTransparency = 1
-combatPage.LayoutOrder = 2
-combatPage.Visible = false
-combatPage.Parent = content
+-- Seção Main
+local sectionMain = Instance.new("TextLabel")
+sectionMain.Parent = content
+sectionMain.Size = UDim2.new(1, -40, 0, 20)
+sectionMain.Position = UDim2.new(0, 20, 0, 70)
+sectionMain.BackgroundTransparency = 1
+sectionMain.Text = "MAIN"
+sectionMain.TextColor3 = Colors.TextGray
+sectionMain.TextSize = 11
+sectionMain.Font = Enum.Font.GothamBold
+sectionMain.TextXAlignment = Enum.TextXAlignment.Left
+sectionMain.ZIndex = 7
 
-local combatLayout = Instance.new("UIListLayout")
-combatLayout.Padding = UDim.new(0, 6)
-combatLayout.SortOrder = Enum.SortOrder.LayoutOrder
-combatLayout.Parent = combatPage
-
-makeToggle(combatPage, 1, "Aim Assist")
-makeToggle(combatPage, 2, "Auto Fruit")
-makeToggle(combatPage, 3, "No Cooldown")
-makeButton(combatPage, 4, "Kill Aura")
-makeButton(combatPage, 5, "ESP")
-
-local configPage = Instance.new("Frame")
-configPage.Name = "Config"
-configPage.Size = UDim2.new(1, 0, 1, 0)
-configPage.BackgroundTransparency = 1
-configPage.LayoutOrder = 3
-configPage.Visible = false
-configPage.Parent = content
-
-local configLayout = Instance.new("UIListLayout")
-configLayout.Padding = UDim.new(0, 6)
-configLayout.SortOrder = Enum.SortOrder.LayoutOrder
-configLayout.Parent = configPage
-
-makeButton(configPage, 1, "Save Config")
-makeButton(configPage, 2, "Load Config")
-makeButton(configPage, 3, "Reset Config")
-makeButton(configPage, 4, "Credits")
-
-local pages = { Home = homePage, Combat = combatPage, Config = configPage }
-
-for tabName, btn in pairs(tabButtons) do
-    btn.MouseButton1Click:Connect(function()
-        -- Atualiza visual das tabs
-        for name, b in pairs(tabButtons) do
-            b.BackgroundColor3 = toggleOff
-        end
-        btn.BackgroundColor3 = accentDim
-
-        -- Mostra página certa
-        for name, page in pairs(pages) do
-            page.Visible = (name == tabName)
-        end
+-- Função para criar Card
+local function createCard(posY, title, desc)
+    local card = Instance.new("Frame")
+    card.Parent = content
+    card.Size = UDim2.new(1, -40, 0, 50)
+    card.Position = UDim2.new(0, 20, 0, posY)
+    card.BackgroundColor3 = Colors.Card
+    card.BorderSizePixel = 1
+    card.BorderColor3 = Colors.Border
+    card.ZIndex = 7
+    
+    local cardCorner = Instance.new("UICorner")
+    cardCorner.CornerRadius = UDim.new(0, 10)
+    cardCorner.Parent = card
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Parent = card
+    titleLabel.Size = UDim2.new(1, -70, 0, 20)
+    titleLabel.Position = UDim2.new(0, 15, 0, 8)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Colors.TextWhite
+    titleLabel.TextSize = 13
+    titleLabel.Font = Enum.Font.GothamMedium
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = 8
+    
+    local descLabel = Instance.new("TextLabel")
+    descLabel.Parent = card
+    descLabel.Size = UDim2.new(1, -70, 0, 15)
+    descLabel.Position = UDim2.new(0, 15, 0, 26)
+    descLabel.BackgroundTransparency = 1
+    descLabel.Text = desc
+    descLabel.TextColor3 = Colors.TextGray
+    descLabel.TextSize = 11
+    descLabel.Font = Enum.Font.Gotham
+    descLabel.TextXAlignment = Enum.TextXAlignment.Left
+    descLabel.ZIndex = 8
+    
+    -- Botão Toggle
+    local toggle = Instance.new("TextButton")
+    toggle.Parent = card
+    toggle.Size = UDim2.new(0, 44, 0, 24)
+    toggle.Position = UDim2.new(1, -60, 0.5, -12)
+    toggle.BackgroundColor3 = Colors.ToggleOff
+    toggle.BorderSizePixel = 0
+    toggle.Text = ""
+    toggle.ZIndex = 8
+    
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(1, 0)
+    toggleCorner.Parent = toggle
+    
+    local knob = Instance.new("Frame")
+    knob.Parent = toggle
+    knob.Size = UDim2.new(0, 18, 0, 18)
+    knob.Position = UDim2.new(0, 3, 0.5, -9)
+    knob.BackgroundColor3 = Color3.fromRGB(136, 136, 136)
+    knob.BorderSizePixel = 0
+    knob.ZIndex = 9
+    
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1, 0)
+    knobCorner.Parent = knob
+    
+    -- Lógica do Toggle (FUNCIONAL)
+    local isActive = false
+    toggle.MouseButton1Click:Connect(function()
+        isActive = not isActive
+        local targetColor = isActive and Colors.ToggleOn or Colors.ToggleOff
+        local targetKnobColor = isActive and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(136, 136, 136)
+        local targetPos = isActive and UDim2.new(0, 23, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+        
+        TweenService:Create(toggle, TweenInfo.new(0.2), {BackgroundColor3 = targetColor}):Play()
+        TweenService:Create(knob, TweenInfo.new(0.2), {BackgroundColor3 = targetKnobColor, Position = targetPos}):Play()
+        
+        print(title, ":", isActive)
     end)
 end
 
-local dragging, dragInput, dragStart, startPos
-main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = main.Position
-    end
-end)
-main.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = false
-    end
-end)
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+createCard(95, "Auto Farm Level", "Automatically farms mobs to level up your...")
 
-local notif = Instance.new("Frame")
-notif.Size = UDim2.new(0, 220, 0, 44)
-notif.Position = UDim2.new(1, -232, 0, 10)
-notif.BackgroundColor3 = mainTheme
-notif.BorderSizePixel = 0
-notif.Visible = false
-notif.Parent = gui
+-- Seção Secret Quests
+local sectionSecret = Instance.new("TextLabel")
+sectionSecret.Parent = content
+sectionSecret.Size = UDim2.new(1, -40, 0, 20)
+sectionSecret.Position = UDim2.new(0, 20, 0, 160)
+sectionSecret.BackgroundTransparency = 1
+sectionSecret.Text = "SECRET QUESTS"
+sectionSecret.TextColor3 = Colors.TextGray
+sectionSecret.TextSize = 11
+sectionSecret.Font = Enum.Font.GothamBold
+sectionSecret.TextXAlignment = Enum.TextXAlignment.Left
+sectionSecret.ZIndex = 7
 
-local notifCorner = Instance.new("UICorner")
-notifCorner.CornerRadius = UDim.new(0, 8)
-notifCorner.Parent = notif
+createCard(185, "Auto Secret Quests", "Completes available Secret Quests until...")
 
-local notifStroke = Instance.new("UIStroke")
-notifStroke.Color = accent
-notifStroke.Thickness = 1
-notifStroke.Parent = notif
+-- Card com Dropdown
+local dropdownCard = Instance.new("Frame")
+dropdownCard.Parent = content
+dropdownCard.Size = UDim2.new(1, -40, 0, 50)
+dropdownCard.Position = UDim2.new(0, 20, 0, 240)
+dropdownCard.BackgroundColor3 = Colors.Card
+dropdownCard.BorderSizePixel = 1
+dropdownCard.BorderColor3 = Colors.Border
+dropdownCard.ZIndex = 7
 
-local notifText = Instance.new("TextLabel")
-notifText.Size = UDim2.new(1, -20, 1, 0)
-notifText.Position = UDim2.new(0, 10, 0, 0)
-notifText.BackgroundTransparency = 1
-notifText.Text = "Vox Hub carregado"
-notifText.TextColor3 = textWhite
-notifText.TextSize = 13
-notifText.Font = Enum.Font.GothamMedium
-notifText.TextXAlignment = Enum.TextXAlignment.Left
-notifText.Parent = notif
+local dropCorner = Instance.new("UICorner")
+dropCorner.CornerRadius = UDim.new(0, 10)
+dropCorner.Parent = dropdownCard
 
-task.delay(0.3, function()
-    notif.Visible = true
-    task.delay(3, function()
-        local tween = TweenService:Create(notif, TweenInfo.new(0.4), {Position = UDim2.new(1, -232, 0, -60)})
+local dropTitle = Instance.new("TextLabel")
+dropTitle.Parent = dropdownCard
+dropTitle.Size = UDim2.new(1, -120, 0, 20)
+dropTitle.Position = UDim2.new(0, 15, 0, 8)
+dropTitle.BackgroundTransparency = 1
+dropTitle.Text = "Secret Quest"
+dropTitle.TextColor3 = Colors.TextWhite
+dropTitle.TextSize = 13
+dropTitle.Font = Enum.Font.GothamMedium
+dropTitle.TextXAlignment = Enum.TextXAlignment.Left
+dropTitle.ZIndex = 8
+
+local dropDesc = Instance.new("TextLabel")
+dropDesc.Parent = dropdownCard
+dropDesc.Size = UDim2.new(1, -120, 0, 15)
+dropDesc.Position = UDim2.new(0, 15, 0, 26)
+dropDesc.BackgroundTransparency = 1
+dropDesc.Text = "Auto follows quest progress..."
+dropDesc.TextColor3 = Colors.TextGray
+dropDesc.TextSize = 11
+dropDesc.Font = Enum.Font.Gotham
+dropDesc.TextXAlignment = Enum.TextXAlignment.Left
+dropDesc.ZIndex = 8
+
+local dropdown = Instance.new("TextButton")
+dropdown.Parent = dropdownCard
+dropdown.Size = UDim2.new(0, 70, 0, 24)
+dropdown.Position = UDim2.new(1, -85, 0.5, -12)
+dropdown.BackgroundColor3 = Colors.Background
+dropdown.BorderSizePixel = 1
+dropdown.BorderColor3 = Colors.Border
+dropdown.Text = "Auto  ▼"
+dropdown.TextColor3 = Colors.TextWhite
+dropdown.TextSize = 11
+dropdown.Font = Enum.Font.Gotham
+dropdown.ZIndex = 8
+
+local dropCorner2 = Instance.new("UICorner")
+dropCorner2.CornerRadius = UDim.new(0, 6)
+dropCorner2.Parent = dropdown
+
+-- =======================================================
+-- 5. LÓGICA DE ABRIR / FECHAR MENU
+-- =======================================================
+local menuOpen = false
+floatingBtn.MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    if menuOpen then
+        menu.Visible = true
+        menu.Size = UDim2.new(0, 550, 0, 400)
+        menu.BackgroundTransparency = 1
+        TweenService:Create(menu, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            BackgroundTransparency = 0
+        }):Play()
+    else
+        local tween = TweenService:Create(menu, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            BackgroundTransparency = 1
+        })
         tween:Play()
         tween.Completed:Connect(function()
-            notif.Visible = false
+            menu.Visible = false
         end)
-    end)
-end)   
+    end
+end)
