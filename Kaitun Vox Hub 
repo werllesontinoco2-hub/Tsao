@@ -5,14 +5,14 @@ local Config = {
     SafeHealth = 20,
     Race = "Mink",
     SkipFruits = {"Buddha", "T-Rex", "Leopard", "Dough"},
-    
-    -- V4
     AutoV4 = true,
-    V4TrainMinutes = 3,  -- minutos de treinamento por trial
+    V4Hop = true,
 }
 
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
+local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
 
 local COLORS = {
     BG        = Color3.fromRGB(15, 15, 25),
@@ -29,7 +29,6 @@ local COLORS = {
     GRAD_BOT  = Color3.fromRGB(10, 10, 20),
 }
 
--- Main frame
 local main = Instance.new("Frame")
 main.Name = "KaitunGUI"
 main.Size = UDim2.new(0, 320, 0, 420)
@@ -47,7 +46,6 @@ mainStroke.Color = Color3.fromRGB(60, 60, 100)
 mainStroke.Thickness = 1.5
 mainStroke.Parent = main
 
--- Header
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 50)
 header.BackgroundColor3 = COLORS.GRAD_TOP
@@ -58,7 +56,6 @@ local headerCornerTop = Instance.new("UICorner")
 headerCornerTop.CornerRadius = UDim.new(0, 14)
 headerCornerTop.Parent = header
 
--- Header text
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -20, 0, 25)
 title.Position = UDim2.new(0, 15, 0, 5)
@@ -81,7 +78,6 @@ subtitle.Font = Enum.Font.Gotham
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.Parent = header
 
--- Status bar
 local statusFrame = Instance.new("Frame")
 statusFrame.Size = UDim2.new(1, -20, 0, 45)
 statusFrame.Position = UDim2.new(0, 10, 0, 60)
@@ -123,7 +119,6 @@ statusDetail.Font = Enum.Font.Gotham
 statusDetail.TextXAlignment = Enum.TextXAlignment.Left
 statusDetail.Parent = statusFrame
 
--- Progress bar
 local progressBg = Instance.new("Frame")
 progressBg.Size = UDim2.new(1, -20, 0, 8)
 progressBg.Position = UDim2.new(0, 10, 0, 115)
@@ -144,7 +139,6 @@ local progressCornerBar = Instance.new("UICorner")
 progressCornerBar.CornerRadius = UDim.new(1, 0)
 progressCornerBar.Parent = progressBar
 
--- Stats row
 local statsFrame = Instance.new("Frame")
 statsFrame.Size = UDim2.new(1, -20, 0, 55)
 statsFrame.Position = UDim2.new(0, 10, 0, 130)
@@ -197,7 +191,6 @@ fruitLabel.Font = Enum.Font.GothamBold
 fruitLabel.TextXAlignment = Enum.TextXAlignment.Right
 fruitLabel.Parent = statsFrame
 
--- Log area
 local logFrame = Instance.new("Frame")
 logFrame.Size = UDim2.new(1, -20, 1, -220)
 logFrame.Position = UDim2.new(0, 10, 0, 195)
@@ -220,8 +213,6 @@ logScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
 logScroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
 logScroller.Parent = logFrame
 
--- Drag
-local dragInput = InputBegan
 local dragging = false
 local dragStart, dragPos
 main.InputBegan:Connect(function(input)
@@ -289,13 +280,10 @@ local function updateStats()
     local bty = ls:FindFirstChild("Bounty") or ls:FindFirstChild("Honor")
     levelLabel.Text = "Level: " .. (lvl and lvl.Value or "?")
     bountyLabel.Text = "Bounty: " .. (bty and tostring(bty.Value) or "0")
-    
     local fruit = player:FindFirstChild("Blox Fruit")
     fruitLabel.Text = "Fruit: " .. (fruit and fruit.Value or "None")
-    
     local race = player:FindFirstChild("Race")
     raceLabel.Text = "Race: " .. (race and race.Value or "?")
-    
     if lvl then
         setProgress(lvl.Value / Config.MaxLevel)
     end
@@ -317,7 +305,7 @@ end
 
 local function getCharacter()
     local c = player.Character
-    if not c then return nil end
+    if not c then return nil, nil, nil end
     return c, c:FindFirstChild("Humanoid"), c:FindFirstChild("HumanoidRootPart")
 end
 
@@ -328,30 +316,17 @@ local function teleport(pos)
     end
 end
 
-local function teleportTo(partName, parent)
-    local obj = parent and parent:FindFirstChild(partName)
-    if obj then
-        teleport(obj.Position)
-    end
+local function hasQuest()
+    local quest = player:FindFirstChild("Quest")
+    if not quest then return false end
+    return quest:FindFirstChild("Active") ~= nil
 end
 
-local RaceV4 = {
-    -- Posições dos trials (do Gui0494/blox-fruits-delta)
-    TrialLocations = {
-        Human   = CFrame.new(-7894, 5548, -380),
-        Mink    = CFrame.new(-12489, 332, -7558),
-        Fishman = CFrame.new(61366, 18, 1476),
-        Skypiea = CFrame.new(-7648, 5586, -1414),
-        Cyborg  = CFrame.new(5331, 54, 4038),
-        Ghoul   = CFrame.new(-9479, 142, 5566),
-    },
-    KeyLocations = {
-        Minotaur     = CFrame.new(-12489, 332, -7558),
-        AncientAltar = CFrame.new(-5039, 313, -2991),
-        TempleOfTime = CFrame.new(-7894, 5548, -380),
-        CastleOnSea  = CFrame.new(-5039, 313, -2991),
-    },
-}
+local function needFruit()
+    local fruit = player:FindFirstChild("Blox Fruit")
+    if fruit and fruit.Value and fruit.Value ~= "" then return false end
+    return getLevel() >= 10
+end
 
 local function getMyRace()
     local race = player:FindFirstChild("Race")
@@ -359,10 +334,8 @@ local function getMyRace()
 end
 
 local function hasV3()
-    -- Verifica se já tem V3 (Race Stage >= 3)
     local stage = player:FindFirstChild("RaceStage") or player:FindFirstChild("Race_V")
     if stage and stage.Value >= 3 then return true end
-    -- Fallback: verifica se a ability V3 existe
     local abilities = player:FindFirstChild("Abilities")
     if abilities then
         for _, a in ipairs(abilities:GetChildren()) do
@@ -389,89 +362,179 @@ local function hasV4()
 end
 
 local function activateRaceAbility()
-    -- Ativa a ability da raça (tecla Y)
-    local UIS = game:GetService("UserInputService")
-    UIS:SendKeyEvent(true, Enum.KeyCode.Y, false, game)
+    UserInputService:SendKeyEvent(true, Enum.KeyCode.Y, false, game)
     task.wait(0.1)
-    UIS:SendKeyEvent(false, Enum.KeyCode.Y, false, game)
+    UserInputService:SendKeyEvent(false, Enum.KeyCode.Y, false, game)
     task.wait(0.5)
 end
 
-local function autoV4()
-    setStatus("🔮", "RACE V4", "Completando trial...", COLORS.PURPLE)
-    log("Iniciando Auto V4 para raça: " .. getMyRace(), COLORS.PURPLE)
-    
+local function countEligiblePlayers()
     local myRace = getMyRace()
-    
-    -- Já tem V4?
+    local count = 0
+    local races = {}
+    for _, p in ipairs(game.Players:GetPlayers()) do
+        if p ~= player then
+            local race = p:FindFirstChild("Race")
+            local r = race and race.Value or "Human"
+            if r ~= myRace and not races[r] then
+                races[r] = true
+                count += 1
+            end
+        end
+    end
+    return count
+end
+
+local function isFullMoon()
+    local rs = game:GetService("ReplicatedStorage")
+    local moon = rs:FindFirstChild("MoonPhase") or rs:FindFirstChild("Moon")
+    if moon then
+        local phase = moon:FindFirstChild("Phase")
+        if phase and phase.Value then
+            return phase.Value:lower():find("full") ~= nil
+        end
+    end
+    return false
+end
+
+local function serverHop()
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, {})
+end
+
+local function autoV4()
     if hasV4() then
         setStatus("✅", "RACE V4 COMPLETA", "Já está em V4", COLORS.GREEN)
-        log("Race já está em V4!", COLORS.GREEN)
         return true
     end
-    
-    -- Tem V3?
+
     if not hasV3() then
         setStatus("⚠️", "V4 BLOQUEADO", "Precisa de V3 primeiro", COLORS.YELLOW)
-        log("Sem V3 — evoluindo raça primeiro", COLORS.YELLOW)
+        log("Sem V3 — não pode fazer trial", COLORS.YELLOW)
         return false
     end
-    
-    -- Teleportar pro trial da raça
-    local trialPos = RaceV4.TrialLocations[myRace]
-    if not trialPos then
-        trialPos = RaceV4.KeyLocations.TempleOfTime
-        log("Trial não mapeado, indo pro Temple of Time", COLORS.YELLOW)
+
+    local myRace = getMyRace()
+    setStatus("🔮", "RACE V4", "Verificando condições...", COLORS.PURPLE)
+    log("Iniciando Auto V4 — Raça: " .. myRace, COLORS.PURPLE)
+
+    local eligible = countEligiblePlayers()
+    if eligible < 2 then
+        if Config.V4Hop then
+            setStatus("🔮", "V4: SEM ALVOS", "Hopping server (precisa 2+ raças diferentes)", COLORS.PURPLE)
+            log("Só " .. eligible .. " raça(s) diferente(s) — hopping...", COLORS.YELLOW)
+            task.wait(3)
+            serverHop()
+            return false
+        else
+            setStatus("🔮", "V4: AGUARDANDO", "Precisa 2+ players de raças diferentes", COLORS.PURPLE)
+            task.wait(10)
+            return false
+        end
     end
-    
-    log("Teleportando pro trial: " .. myRace, COLORS.PURPLE)
-    teleport(trialPos.Position)
+
+    if not isFullMoon() then
+        setStatus("🌙", "V4: AGUARDANDO LUA CHEIA", "Full moon necessária", COLORS.PURPLE)
+        log("Aguardando lua cheia...", COLORS.YELLOW)
+        task.wait(30)
+        return false
+    end
+
+    local TempleOfTime = CFrame.new(-7894, 5548, -380)
+    local TrialDoors = {
+        Human   = CFrame.new(-7894, 5548, -350),
+        Mink    = CFrame.new(-7894, 5548, -370),
+        Fishman = CFrame.new(-7894, 5548, -390),
+        Skypiea = CFrame.new(-7894, 5548, -410),
+        Cyborg  = CFrame.new(-7894, 5548, -430),
+        Ghoul   = CFrame.new(-7894, 5548, -450),
+        Angel   = CFrame.new(-7894, 5548, -470),
+        Shark   = CFrame.new(-7894, 5548, -490),
+    }
+
+    setStatus("🔮", "V4: TELEPORTANDO", "Indo pro Temple of Time", COLORS.PURPLE)
+    log("Teleportando pro Temple of Time", COLORS.PURPLE)
+    teleport(TempleOfTime.Position)
+    task.wait(3)
+
+    local door = TrialDoors[myRace] or TrialDoors.Human
+    setStatus("🔮", "V4: NA PORTA", "Ativando race ability...", COLORS.PURPLE)
+    teleport(door.Position)
     task.wait(2)
-    
-    -- Ativar race ability (necessário pra trial)
+
     activateRaceAbility()
-    task.wait(1)
-    
-    -- O trial em si varia por raça:
-    -- Human: matar Flame/Quake/Light/Dark/Rumble Master
-    -- Mink: completar maze
-    -- Shark: matar Sea Beast
-    -- Ghoul: matar waves de Ancient Zombies
-    -- Angel: parkour
-    -- 
-    -- A automação do trial em si depende de cada raça.
-    -- Aqui o script ativa a ability e fica no local.
-    -- O player precisa completar o trial (ou o script faz se tiver a lógica)
-    
-    setStatus("🔮", "RACE V4", "Complete o trial manualmente ou aguarde", COLORS.PURPLE)
-    log("Agora complete o trial (o script te teleportou no local certo)", COLORS.PURPLE)
-    
-    -- Aguardar trial completar (polling)
-    for i = 1, 60 do  -- 2 min max
+    log("Race ability ativada — aguardando porta abrir", COLORS.PURPLE)
+    setStatus("🔮", "V4: TRIAL INICIADO", "Lutando...", COLORS.PURPLE)
+
+    local _, humanoid, root = getCharacter()
+    if not humanoid or not root then return false end
+
+    for i = 1, 120 do
         task.wait(2)
+
         if hasV4() then
             log("V4 UNLOCKED! 🎉", COLORS.GREEN)
             setStatus("✅", "RACE V4 UNLOCKED", "Completado!", COLORS.GREEN)
             return true
         end
+
+        local hpPct = (humanoid.Health / humanoid.MaxHealth) * 100
+        if hpPct < Config.SafeHealth then
+            teleport(root.Position + Vector3.new(0, 200, 0))
+            task.wait(2)
+        end
+
+        local nearest = nil
+        local nearestDist = 200
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj ~= root and obj.Parent then
+                if obj.Parent:FindFirstChild("Humanoid") then
+                    local d = (root.Position - obj.Position).Magnitude
+                    if d < nearestDist then
+                        nearestDist = d
+                        nearest = obj
+                    end
+                end
+            end
+        end
+
+        if nearest then
+            local UIS = game:GetService("UserInputService")
+            for _, key in ipairs({Enum.KeyCode.Z, Enum.KeyCode.X, Enum.KeyCode.C}) do
+                UIS:SendKeyEvent(true, key, false, game)
+                task.wait(0.05)
+                UIS:SendKeyEvent(false, key, false, game)
+                task.wait(math.random(8, 25) / 100)
+            end
+        end
     end
-    
-    log("Trial não completou em 2 min — tenta de novo", COLORS.RED)
+
+    local AncientClock = CFrame.new(-7894, 5560, -380)
+    log("Trial terminou — indo pro Ancient Clock", COLORS.PURPLE)
+    teleport(AncientClock.Position)
+    task.wait(3)
+
+    if hasV4() then
+        log("V4 UNLOCKED via Ancient Clock! 🎉", COLORS.GREEN)
+        setStatus("✅", "RACE V4 UNLOCKED", "Completado!", COLORS.GREEN)
+        return true
+    end
+
+    log("V4 não completou — tenta de novo", COLORS.RED)
+    setStatus("🔮", "V4 FALHOU", "Tenta de novo", COLORS.RED)
     return false
 end
 
 local function autoBounty()
     local _, humanoid, root = getCharacter()
     if not humanoid or not root then return end
-    
+
     local bounty = getBounty()
-    setStatus("⚔️", "BOUNTY: " .. string.format("%.1fM / 10M", bounty / 1000000), 
+    setStatus("⚔️", "BOUNTY: " .. string.format("%.1fM / 10M", bounty / 1000000),
         "Procurando alvo...", COLORS.RED)
-    
-    -- Procurar alvo
+
     local target = nil
     local bestBounty = 0
-    
+
     for _, p in ipairs(game.Players:GetPlayers()) do
         if p ~= player then
             local ls = p:FindFirstChild("leaderstats")
@@ -492,25 +555,23 @@ local function autoBounty()
             end
         end
     end
-    
+
     if not target then
         setStatus("⚔️", "BOUNTY", "Sem alvos... esperando", COLORS.RED)
         task.wait(5)
         return
     end
-    
-    -- Mover
+
     local tChar = target.Character
     if not tChar then return end
     local tRoot = tChar:FindFirstChild("HumanoidRootPart")
     if not tRoot then return end
-    
+
     local dist = (root.Position - tRoot.Position).Magnitude
     if dist > 150 then
         teleport(tRoot.Position)
     end
-    
-    -- Health check
+
     local hpPct = (humanoid.Health / humanoid.MaxHealth) * 100
     if hpPct < Config.SafeHealth then
         setStatus("💔", "HP BAIXO", "Fugindo...", COLORS.RED)
@@ -518,17 +579,16 @@ local function autoBounty()
         task.wait(3)
         return
     end
-    
-    -- Atacar
+
     setStatus("⚔️", "A: " .. target.Name, bestBounty .. " bounty", COLORS.RED)
     log("Atacando: " .. target.Name, COLORS.RED)
-    
+
     local UIS = game:GetService("UserInputService")
     for i = 1, 15 do
         if not target.Character or not target.Character:FindFirstChild("Humanoid") then break end
         local tHum = target.Character:FindFirstChild("Humanoid")
         if tHum and tHum.Health <= 0 then break end
-        
+
         for _, key in ipairs({Enum.KeyCode.Z, Enum.KeyCode.X, Enum.KeyCode.C}) do
             UIS:SendKeyEvent(true, key, false, game)
             task.wait(0.05)
@@ -537,8 +597,7 @@ local function autoBounty()
         end
         task.wait(0.1)
     end
-    
-    -- Verificou kill
+
     if not target.Character or not target.Character:FindFirstChild("Humanoid") then
         local newBounty = getBounty()
         log("KILL: " .. target.Name .. " → Bounty: " .. newBounty, COLORS.GREEN)
@@ -549,32 +608,21 @@ end
 
 local function doFarmLevel()
     setStatus("🗡️", "FARM LEVEL", "Farmando boss/quest", COLORS.GREEN)
-    -- ... tua lógica de farm (teleport pro boss, atacar, etc.)
     task.wait(5)
 end
 
 local function doQuest()
     setStatus("📋", "QUEST", "Completando missão", COLORS.YELLOW)
-    -- ... tua lógica de quest
     task.wait(3)
 end
 
 local function doShop()
     setStatus("🛒", "SHOP", "Comprando stuffs", COLORS.ACCENT)
-    -- ... tua lógica de comprar
     task.wait(3)
 end
 
 local function doFruit()
     setStatus("🍎", "FRUIT", "Procurando fruta", COLORS.PURPLE)
-    -- ... tua lógica de fruit
-    task.wait(3)
-end
-
-local function doHop()
-    setStatus("🔄", "HOP", "Trocando server", COLORS.TEXT_DIM)
-    log("Server hop...", COLORS.TEXT_DIM)
-    -- game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, {})
     task.wait(3)
 end
 
@@ -588,14 +636,12 @@ log("Character pronto. Iniciando loop...", COLORS.GREEN)
 
 while true do
     task.wait(2)
-    
+
     local level = getLevel()
     local bounty = getBounty()
     updateStats()
-    
-    -- ═══ FASE 1: KAITUN (abaixo do max level) ═══
+
     if level < Config.MaxLevel then
-        -- Prioridade: V4 > Quest > Fruit > Farm > Shop
         if Config.AutoV4 and hasV3() and not hasV4() then
             autoV4()
         elseif hasQuest() then
@@ -605,15 +651,11 @@ while true do
         else
             doFarmLevel()
         end
-        
-    -- ═══ FASE 2: MAX LEVEL → BOUNTY ═══
     elseif bounty < Config.TargetBounty then
         autoBounty()
-        
-    -- ═══ FASE 3: DONE ═══
     else
         setStatus("🏆", "COMPLETE!", "Max Level + 10M Bounty", COLORS.CYAN)
-        log("🏆 TUDO PRONTO! Max level + 10M bounty!", COLORS.CYAN)
+        log("🏆 TUDO PRONTO!", COLORS.CYAN)
         break
     end
 end
