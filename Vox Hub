@@ -1,0 +1,342 @@
+-- ===== VOX HUB - Interface =====
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+local mainTheme = Color3.fromRGB(25, 20, 40)
+local accent = Color3.fromRGB(140, 80, 255)
+local accentDim = Color3.fromRGB(80, 50, 160)
+local textWhite = Color3.fromRGB(255, 255, 255)
+local textGray = Color3.fromRGB(180, 175, 200)
+local toggleOff = Color3.fromRGB(50, 45, 70)
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "VoxHub"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Janela principal
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = UDim2.new(0, 340, 0, 420)
+main.Position = UDim2.new(0.5, -170, 0.5, -210)
+main.BackgroundColor3 = mainTheme
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = false
+main.Parent = gui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.Parent = main
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = accentDim
+mainStroke.Thickness = 1
+mainStroke.Parent = main
+
+-- Layout
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 8)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = main
+
+local padding = Instance.new("UIPadding")
+padding.PaddingTop = UDim.new(0, 12)
+padding.PaddingLeft = UDim.new(0, 12)
+padding.PaddingRight = UDim.new(0, 12)
+padding.PaddingBottom = UDim.new(0, 12)
+padding.Parent = main
+
+-- ===== TÍTULO =====
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 40)
+titleBar.BackgroundTransparency = 1
+titleBar.LayoutOrder = 1
+titleBar.Parent = main
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0, 120, 1, 0)
+title.Position = UDim2.new(0, 0, 0.5, -14)
+title.BackgroundTransparency = 1
+title.Text = "VOX HUB"
+title.TextColor3 = accent
+title.TextSize = 20
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+local version = Instance.new("TextLabel")
+version.Size = UDim2.new(0, 60, 1, 0)
+version.Position = UDim2.new(1, -60, 0.5, -12)
+version.BackgroundTransparency = 1
+version.Text = "v1.0"
+version.TextColor3 = textGray
+version.TextSize = 12
+version.Font = Enum.Font.Gotham
+version.TextXAlignment = Enum.TextXAlignment.Right
+version.Parent = titleBar
+
+-- ===== TABS =====
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, 0, 0, 36)
+tabFrame.BackgroundTransparency = 1
+tabFrame.LayoutOrder = 2
+tabFrame.Parent = main
+
+local tabLayout = Instance.new("UIListLayout")
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+tabLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+tabLayout.Padding = UDim.new(0, 6)
+tabLayout.Parent = tabFrame
+
+local tabs = {"Home", "Combat", "Config"}
+local tabButtons = {}
+local contentFrames = {}
+
+for i, tabName in ipairs(tabs) do
+    local btn = Instance.new("TextButton")
+    btn.Name = tabName
+    btn.Size = UDim2.new(0, 90, 0, 30)
+    btn.BackgroundColor3 = i == 1 and accentDim or toggleOff
+    btn.Text = tabName
+    btn.TextColor3 = textWhite
+    btn.TextSize = 13
+    btn.Font = Enum.Font.GothamMedium
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = i
+    btn.Parent = tabFrame
+
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 8)
+    c.Parent = btn
+
+    tabButtons[tabName] = btn
+end
+
+-- ===== CONTEÚDO (PÁGINAS) =====
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, 0, 1, -86)
+content.Position = UDim2.new(0, 0, 0, 86)
+content.BackgroundTransparency = 1
+content.Parent = main
+
+local pageLayout = Instance.new("UIListLayout")
+pageLayout.Padding = UDim.new(0, 6)
+pageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+pageLayout.Parent = content
+
+-- Helper: criar toggle
+local function makeToggle(parent, order, label)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 36)
+    frame.BackgroundColor3 = toggleOff
+    frame.BorderSizePixel = 0
+    frame.LayoutOrder = order
+    frame.Parent = parent
+
+    local fc = Instance.new("UICorner")
+    fc.CornerRadius = UDim.new(0, 8)
+    fc.Parent = frame
+
+    local label2 = Instance.new("TextLabel")
+    label2.Size = UDim2.new(0, 200, 1, 0)
+    label2.Position = UDim2.new(0, 12, 0, 0)
+    label2.BackgroundTransparency = 1
+    label2.Text = label
+    label2.TextColor3 = textWhite
+    label2.TextSize = 13
+    label2.Font = Enum.Font.Gotham
+    label2.TextXAlignment = Enum.TextXAlignment.Left
+    label2.Parent = frame
+
+    local toggle = Instance.new("TextButton")
+    toggle.Size = UDim2.new(0, 50, 0, 24)
+    toggle.Position = UDim2.new(1, -62, 0.5, -12)
+    toggle.BackgroundColor3 = accent
+    toggle.Text = "ON"
+    toggle.TextColor3 = textWhite
+    toggle.TextSize = 11
+    toggle.Font = Enum.Font.GothamBold
+    toggle.BorderSizePixel = 0
+    toggle.Parent = frame
+
+    local tc = Instance.new("UICorner")
+    tc.CornerRadius = UDim.new(0, 6)
+    tc.Parent = toggle
+
+    local isOn = true
+    toggle.MouseButton1Click:Connect(function()
+        isOn = not isOn
+        toggle.Text = isOn and "ON" or "OFF"
+        toggle.BackgroundColor3 = isOn and accent or Color3.fromRGB(40, 35, 55)
+    end)
+
+    return frame
+end
+
+-- Helper: criar botão simples
+local function makeButton(parent, order, label)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 36)
+    btn.BackgroundColor3 = toggleOff
+    btn.Text = label
+    btn.TextColor3 = textWhite
+    btn.TextSize = 13
+    btn.Font = Enum.Font.Gotham
+    btn.BorderSizePixel = 0
+    btn.LayoutOrder = order
+    btn.Parent = parent
+
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 8)
+    c.Parent = btn
+
+    btn.MouseButton1Click:Connect(function()
+        btn.BackgroundColor3 = accentDim
+        task.delay(0.15, function()
+            btn.BackgroundColor3 = toggleOff
+        end)
+    end)
+
+    return btn
+end
+
+-- ===== PÁGINA: HOME =====
+local homePage = Instance.new("Frame")
+homePage.Name = "Home"
+homePage.Size = UDim2.new(1, 0, 1, 0)
+homePage.BackgroundTransparency = 1
+homePage.LayoutOrder = 1
+homePage.Parent = content
+
+local homeLayout = Instance.new("UIListLayout")
+homeLayout.Padding = UDim.new(0, 6)
+homeLayout.SortOrder = Enum.SortOrder.LayoutOrder
+homeLayout.Parent = homePage
+
+makeToggle(homePage, 1, "Auto Farm")
+makeToggle(homePage, 2, "Auto Raid")
+makeToggle(homePage, 3, "Auto Quest")
+makeButton(homePage, 4, "Teleport to Island")
+makeButton(homePage, 5, "Reset Stamina")
+
+-- ===== PÁGINA: COMBAT =====
+local combatPage = Instance.new("Frame")
+combatPage.Name = "Combat"
+combatPage.Size = UDim2.new(1, 0, 1, 0)
+combatPage.BackgroundTransparency = 1
+combatPage.LayoutOrder = 2
+combatPage.Visible = false
+combatPage.Parent = content
+
+local combatLayout = Instance.new("UIListLayout")
+combatLayout.Padding = UDim.new(0, 6)
+combatLayout.SortOrder = Enum.SortOrder.LayoutOrder
+combatLayout.Parent = combatPage
+
+makeToggle(combatPage, 1, "Aim Assist")
+makeToggle(combatPage, 2, "Auto Fruit")
+makeToggle(combatPage, 3, "No Cooldown")
+makeButton(combatPage, 4, "Kill Aura")
+makeButton(combatPage, 5, "ESP")
+
+-- ===== PÁGINA: CONFIG =====
+local configPage = Instance.new("Frame")
+configPage.Name = "Config"
+configPage.Size = UDim2.new(1, 0, 1, 0)
+configPage.BackgroundTransparency = 1
+configPage.LayoutOrder = 3
+configPage.Visible = false
+configPage.Parent = content
+
+local configLayout = Instance.new("UIListLayout")
+configLayout.Padding = UDim.new(0, 6)
+configLayout.SortOrder = Enum.SortOrder.LayoutOrder
+configLayout.Parent = configPage
+
+makeButton(configPage, 1, "Save Config")
+makeButton(configPage, 2, "Load Config")
+makeButton(configPage, 3, "Reset Config")
+makeButton(configPage, 4, "Credits")
+
+-- ===== NAVEGAÇÃO DE TABS =====
+local pages = { Home = homePage, Combat = combatPage, Config = configPage }
+
+for tabName, btn in pairs(tabButtons) do
+    btn.MouseButton1Click:Connect(function()
+        -- Atualiza visual das tabs
+        for name, b in pairs(tabButtons) do
+            b.BackgroundColor3 = toggleOff
+        end
+        btn.BackgroundColor3 = accentDim
+
+        -- Mostra página certa
+        for name, page in pairs(pages) do
+            page.Visible = (name == tabName)
+        end
+    end)
+end
+
+-- ===== DRAG =====
+local dragging, dragInput, dragStart, startPos
+main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = main.Position
+    end
+end)
+main.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- ===== NOTIFICAÇÃO DE ABERTURA =====
+local notif = Instance.new("Frame")
+notif.Size = UDim2.new(0, 220, 0, 44)
+notif.Position = UDim2.new(1, -232, 0, 10)
+notif.BackgroundColor3 = mainTheme
+notif.BorderSizePixel = 0
+notif.Visible = false
+notif.Parent = gui
+
+local notifCorner = Instance.new("UICorner")
+notifCorner.CornerRadius = UDim.new(0, 8)
+notifCorner.Parent = notif
+
+local notifStroke = Instance.new("UIStroke")
+notifStroke.Color = accent
+notifStroke.Thickness = 1
+notifStroke.Parent = notif
+
+local notifText = Instance.new("TextLabel")
+notifText.Size = UDim2.new(1, -20, 1, 0)
+notifText.Position = UDim2.new(0, 10, 0, 0)
+notifText.BackgroundTransparency = 1
+notifText.Text = "Vox Hub carregado"
+notifText.TextColor3 = textWhite
+notifText.TextSize = 13
+notifText.Font = Enum.Font.GothamMedium
+notifText.TextXAlignment = Enum.TextXAlignment.Left
+notifText.Parent = notif
+
+task.delay(0.3, function()
+    notif.Visible = true
+    task.delay(3, function()
+        local tween = TweenService:Create(notif, TweenInfo.new(0.4), {Position = UDim2.new(1, -232, 0, -60)})
+        tween:Play()
+        tween.Completed:Connect(function()
+            notif.Visible = false
+        end)
+    end)
+end)   
