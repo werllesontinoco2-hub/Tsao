@@ -1,4 +1,3 @@
--- ===== VOX HUB - Interface =====
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
@@ -16,7 +15,6 @@ gui.Name = "VoxHub"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
--- Janela principal
 local main = Instance.new("Frame")
 main.Name = "Main"
 main.Size = UDim2.new(0, 340, 0, 420)
@@ -49,7 +47,6 @@ padding.PaddingRight = UDim.new(0, 12)
 padding.PaddingBottom = UDim.new(0, 12)
 padding.Parent = main
 
--- ===== TÍTULO =====
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 40)
 titleBar.BackgroundTransparency = 1
@@ -78,7 +75,6 @@ version.Font = Enum.Font.Gotham
 version.TextXAlignment = Enum.TextXAlignment.Right
 version.Parent = titleBar
 
--- ===== TABS =====
 local tabFrame = Instance.new("Frame")
 tabFrame.Size = UDim2.new(1, 0, 0, 36)
 tabFrame.BackgroundTransparency = 1
@@ -116,7 +112,6 @@ for i, tabName in ipairs(tabs) do
     tabButtons[tabName] = btn
 end
 
--- ===== CONTEÚDO (PÁGINAS) =====
 local content = Instance.new("Frame")
 content.Size = UDim2.new(1, 0, 1, -86)
 content.Position = UDim2.new(0, 0, 0, 86)
@@ -204,7 +199,6 @@ local function makeButton(parent, order, label)
     return btn
 end
 
--- ===== PÁGINA: HOME =====
 local homePage = Instance.new("Frame")
 homePage.Name = "Home"
 homePage.Size = UDim2.new(1, 0, 1, 0)
@@ -223,7 +217,6 @@ makeToggle(homePage, 3, "Auto Quest")
 makeButton(homePage, 4, "Teleport to Island")
 makeButton(homePage, 5, "Reset Stamina")
 
--- ===== PÁGINA: COMBAT =====
 local combatPage = Instance.new("Frame")
 combatPage.Name = "Combat"
 combatPage.Size = UDim2.new(1, 0, 1, 0)
@@ -243,7 +236,6 @@ makeToggle(combatPage, 3, "No Cooldown")
 makeButton(combatPage, 4, "Kill Aura")
 makeButton(combatPage, 5, "ESP")
 
--- ===== PÁGINA: CONFIG =====
 local configPage = Instance.new("Frame")
 configPage.Name = "Config"
 configPage.Size = UDim2.new(1, 0, 1, 0)
@@ -262,7 +254,6 @@ makeButton(configPage, 2, "Load Config")
 makeButton(configPage, 3, "Reset Config")
 makeButton(configPage, 4, "Credits")
 
--- ===== NAVEGAÇÃO DE TABS =====
 local pages = { Home = homePage, Combat = combatPage, Config = configPage }
 
 for tabName, btn in pairs(tabButtons) do
@@ -280,7 +271,6 @@ for tabName, btn in pairs(tabButtons) do
     end)
 end
 
--- ===== DRAG =====
 local dragging, dragInput, dragStart, startPos
 main.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -301,7 +291,6 @@ game:GetService("UserInputService").InputChanged:Connect(function(input)
     end
 end)
 
--- ===== NOTIFICAÇÃO DE ABERTURA =====
 local notif = Instance.new("Frame")
 notif.Size = UDim2.new(0, 220, 0, 44)
 notif.Position = UDim2.new(1, -232, 0, 10)
