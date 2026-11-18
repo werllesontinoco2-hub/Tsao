@@ -17,12 +17,8 @@ local ok,err=pcall(function()
     local UIS=game:GetService("UserInputService")
     local R=Color3.fromRGB
     local RunService = game:GetService("RunService")
-    
-    -- Serviços e Remotes do Blox Fruits
     local RS = game:GetService("ReplicatedStorage")
-    local Remotes = RS:FindFirstChild("Remotes")
-    local CommF = Remotes and Remotes:FindFirstChild("CommF_")
-    local CombatRemote = Remotes and Remotes:FindFirstChild("Combat")
+    local CommF = RS:FindFirstChild("Remotes") and RS.Remotes:FindFirstChild("CommF_")
 
     local CORES={
         FundoMenu=R(15,17,24), FundoCard=R(24,27,38), TextoBranco=R(255,255,255),
@@ -111,18 +107,17 @@ local ok,err=pcall(function()
     criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,12),UDim2.new(0,22,0,8),CORES.TextoCinza,false,9)
     local statusTask=criarTexto(containerStatus,"Aguardando...",UDim2.new(1,0,0,15),UDim2.new(0,10,0,24),CORES.TextoBranco,false,11)
 
-    local dragging, dragInput, dragStart, startPos
-    local function updateDrag(input)
-        local delta = input.Position - dragStart
-        menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
+    local dragging, dragStart, startPos
     cabecalho.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true; dragStart = input.Position; startPos = menu.Position
         end
     end)
     UIS.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then updateDrag(input) end
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
     end)
     UIS.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
@@ -201,112 +196,96 @@ local ok,err=pcall(function()
     local function GR() return P.Character and P.Character:FindFirstChild("HumanoidRootPart") end
     local function GH() return P.Character and P.Character:FindFirstChild("Humanoid") end
 
-    -- VOO
-    local voando = false
-    local voarAtivo = true
-    local function IniciarVoo()
-        if voando then return end
-        voando = true
-        local hrp = GR()
-        if not hrp then voando = false return end
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "KaitunFly"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge); bv.Velocity = Vector3.new(0,0,0); bv.Parent = hrp
-        local connection
-        connection = RunService.Heartbeat:Connect(function()
-            if not voarAtivo or not GR() or not GH().Parent then
-                if connection then connection:Disconnect() end
-                if bv then bv:Destroy() end
-                voando = false
-                return
-            end
-            if bv.Velocity.Magnitude < 1 then bv.Velocity = Vector3.new(0, 2, 0) end
-        end)
-    end
-
+    -- ==========================================
+    -- VOO SUAVE
+    -- ==========================================
     local function VoarPara(posicao)
         local hrp = GR()
         if not hrp then return end
-        IniciarVoo()
-        local bv = hrp:FindFirstChild("KaitunFly")
-        if not bv then return end
-        local velocidade = 120
-        while (posicao - hrp.Position).Magnitude > 10 do
+        
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bv.Parent = hrp
+        
+        local tempo = 0
+        while tempo < 3 do -- Voa por no máximo 3 segundos por vez
             if not hrp or not hrp.Parent then break end
-            local novaDirecao = (posicao - hrp.Position).Unit
-            bv.Velocity = novaDirecao * velocidade
+            local direcao = (posicao - hrp.Position).Unit
+            bv.Velocity = direcao * 120 -- Velocidade segura
             task.wait(0.1)
+            tempo = tempo + 0.1
+            if (posicao - hrp.Position).Magnitude < 15 then break end
         end
-        bv.Velocity = Vector3.new(0,0,0)
+        bv:Destroy()
     end
 
     -- ==========================================
-    -- AUTO QUEST E AUTO COLETAR
+    -- TABELA DE QUESTS (Coordenadas exatas dos NPCs)
     -- ==========================================
-    
-    -- Mapeamento de níveis para nomes de ilhas (para o script saber para onde ir)
-    local Ilhas = {
-        [1] = "Bandits", [10] = "Mob", [15] = "Snow Bandits", [30] = "Desert Bandits",
-        [60] = "Frost Bandits", [75] = "Sky Bandits", [120] = "Marine", [150] = "Pirate",
-        [190] = "Swan", [250] = "Magma", [300] = "Fishman", [375] = "Cursed Ship",
-        [500] = "Zombie", [625] = "Bounty", [750] = "Soul", [1000] = "Fist",
-        [1200] = "Haunted", [1500] = "Sea", [1750] = "Vampire", [2000] = "Pirate",
-        [2200] = "Raider", [2400] = "Mythical", [2600] = "Fountain"
+    local Quests = {
+        {lvl = 1, name = "Bandits", pos = Vector3.new(1059.3, 16, 1541.3)},
+        {lvl = 10, name = "Monkey", pos = Vector3.new(-1600, 36, 153)},
+        {lvl = 15, name = "Pirate", pos = Vector3.new(-1154, 15, 3834)},
+        {lvl = 30, name = "Brute", pos = Vector3.new(-1154, 15, 3834)},
+        {lvl = 40, name = "Desert Bandit", pos = Vector3.new(894.6, 12, 2300)},
+        {lvl = 60, name = "Snow Bandit", pos = Vector3.new(1070, 104, -1160)},
+        {lvl = 75, name = "Snowman", pos = Vector3.new(1100, 104, -1350)},
+        {lvl = 90, name = "Marine", pos = Vector3.new(-2500, 50, 2000)},
+        {lvl = 120, name = "Sky Bandit", pos = Vector3.new(-4750, 200, -2000)},
+        {lvl = 150, name = "Prisoner", pos = Vector3.new(5300, 10, 500)},
+        {lvl = 175, name = "Dangerous Prisoner", pos = Vector3.new(5300, 10, 500)},
+        {lvl = 190, name = "Swan Pirate", pos = Vector3.new(4800, 10, -2000)},
+        {lvl = 210, name = "Factory Staff", pos = Vector3.new(400, 20, -2000)},
+        {lvl = 250, name = "Marine", pos = Vector3.new(-2000, 10, -2000)},
+        {lvl = 300, name = "Fishman", pos = Vector3.new(-800, 10, -2000)},
+        {lvl = 375, name = "Cursed Crew", pos = Vector3.new(3000, 100, -4000)},
+        {lvl = 450, name = "Zombie", pos = Vector3.new(-5000, 20, -4000)}
+        -- (Fácil de adicionar mais níveis no futuro)
     }
 
-    local function obterIlhaAtual(lvl)
-        local ilhaAlvo = "Bandits"
-        for nvl, nome in pairs(Ilhas) do
-            if lvl >= nvl then ilhaAlvo = nome end
+    local function getQuestInfo(lvl)
+        local bestQuest = Quests[1]
+        for _, q in ipairs(Quests) do
+            if lvl >= q.lvl then bestQuest = q end
         end
-        return ilhaAlvo
+        return bestQuest
     end
 
-    -- Função para aceitar Quest no NPC (via remote)
+    -- ==========================================
+    -- AUTO QUEST
+    -- ==========================================
     local function AceitarQuest()
-        SETT("Aceitando Quest...", "warn")
         local lvl = getData()
-        local ilha = obterIlhaAtual(lvl)
-        
-        -- Tenta usar o Comando Remoto para teleportar para o NPC de Quest
-        pcall(function()
-            if CommF then CommF:InvokeServer("Teleport", "Quest") end
-        end)
-        task.wait(1.5)
-        
-        -- Tenta aceitar via comando remoto
-        pcall(function()
-            if CommF then 
-                CommF:InvokeServer("AcceptQuest", ilha) 
+        local quest = getQuestInfo(lvl)
+        if not quest then return end
+
+        SETT("Voando até o NPC da Quest...", "warn")
+        VoarPara(quest.pos)
+        task.wait(1) -- Espera chegar
+
+        SETT("Aceitando Quest...", "warn")
+        local aceitou = false
+
+        -- 1. Tenta usar ProximityPrompt (Toque no NPC)
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("ProximityPrompt") and obj.Parent and obj.Parent.Parent and obj.Parent.Parent.Name:find(quest.name, 1, true) then
+                pcall(function() fireproximityprompt(obj) end)
+                aceitou = true
+                break
             end
-        end)
+        end
+
+        -- 2. Se não achar o prompt, usa o comando Remoto oficial
+        if not aceitou then
+            pcall(function()
+                if CommF then CommF:InvokeServer("StartQuest", quest.name, lvl) end
+            end)
+        end
+        
         task.wait(1)
         SETT("Quest Aceita!", "ok")
     end
 
-    -- Função para coletar itens no chão e baús
-    local function ColetarItens()
-        local hrp = GR()
-        if not hrp then return end
-        
-        -- Procura por baús (Chests) no workspace
-        for _, obj in ipairs(workspace:GetChildren()) do
-            if obj.Name:find("Chest") or obj.Name:find("Chest") then
-                local prompt = obj:FindFirstChild("ProximityPrompt")
-                if prompt then
-                    SETT("Coletando Baú...", "ok")
-                    VoarPara(obj.Position)
-                    task.wait(0.5)
-                    pcall(function()
-                        if fireproximityprompt then fireproximityprompt(prompt) end
-                        if CommF then CommF:InvokeServer("Chest", "Collect") end
-                    end)
-                    task.wait(0.5)
-                end
-            end
-        end
-    end
-
-    -- Procura por inimigos da quest atual
     local function findTarget()
         local r = GR()
         if not r then return nil end
@@ -336,23 +315,27 @@ local ok,err=pcall(function()
         UIS:SendKeyEvent(false, Enum.KeyCode.Z, false, game)
     end
 
-    local function doFarm()
+    local function doQuest()
         local h, r = GH(), GR()
         if not h or not r then return end
         
         local tgt = findTarget()
         if not tgt then
-            SETT("Procurando Quest...", "warn")
+            -- Se não achar monstros, significa que a quest acabou ou não foi aceita.
+            -- Então ele vai aceitar a quest novamente.
+            SETT("Procurando Monstros... Aceitando nova Quest.", "warn")
             AceitarQuest()
+            task.wait(2)
             return
         end
         
+        -- Voa até o monstro
         if (tgt.Position - r.Position).Magnitude > 30 then 
-            SETT("Voando até o mob...", "ok")
+            SETT("Voando até o Monstro...", "ok")
             VoarPara(tgt.Position) 
         end
         
-        SETT("Atacando Mobs...", "ok")
+        SETT("Atacando Monstros da Quest...", "ok")
         for i = 1, 15 do
             local h2, r2 = GH(), GR()
             if not h2 or not r2 then break end
@@ -370,9 +353,6 @@ local ok,err=pcall(function()
             atacar(t2)
             task.wait(0.1)
         end
-        
-        -- Depois de atacar, tenta coletar baús próximos
-        ColetarItens()
     end
 
     UP()
@@ -386,13 +366,7 @@ local ok,err=pcall(function()
             if not P.Character or not P.Character:FindFirstChild("HumanoidRootPart") then
                 SETT("Aguardando respawn...", "error")
             else
-                local lvl = getData()
-                if lvl < CF.MaxLvl then
-                    doFarm()
-                else
-                    SETT("Level Máximo alcançado! Coletando itens...", "ok")
-                    ColetarItens()
-                end
+                doQuest()
             end
         end
     end)
