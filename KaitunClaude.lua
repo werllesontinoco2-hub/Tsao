@@ -1,4 +1,4 @@
-local LINK="SEU_LINK_AQUI"   -- link onde o script está hospedado (opcional)
+local LINK="https://raw.githubusercontent.com/werllesontinoco2-hub/Tsao/main/KaitunClaude.lua"   -- link onde o script está hospedado (opcional)
 pcall(function()
     if queue_on_teleport and LINK~="SEU_LINK_AQUI" then
         queue_on_teleport('loadstring(game:HttpGet("'..LINK..'"))()')
