@@ -1,15 +1,13 @@
--- Cole o link onde este script está hospedado (para reabrir sozinho após trocar de server)
-local LINK="https://raw.githubusercontent.com/werllesontinoco2-hub/Tsao/main/KaitunVoxHub.lua"
-
+local LINK="SEU_LINK_AQUI"
 pcall(function()
-    if queue_on_teleport and LINK~="https://raw.githubusercontent.com/werllesontinoco2-hub/Tsao/main/KaitunVoxHub.lua" then
+    if queue_on_teleport and LINK~="SEU_LINK_AQUI" then
         queue_on_teleport('loadstring(game:HttpGet("'..LINK..'"))()')
     end
 end)
 
 local ok,err=pcall(function()
 local CF={Mastery=400,MaxLvl=2800}
-local EX={Stats=true,Buso=true,SafeHP=0.35,FPS=true,Rejoin=true,Frutas=true,Chests=true,
+local EX={Stats=true,Buso=true,SafeHP=0.25,FPS=true,Rejoin=true,Frutas=true,Chests=false,
           Raca=true,Bounty=true,BountyAposEstilos=true,BountyHop=true}
 
 local Players=game:GetService("Players")
@@ -18,21 +16,52 @@ local PG=P:WaitForChild("PlayerGui")
 local TS=game:GetService("TweenService")
 local RS=game:GetService("ReplicatedStorage")
 local VU=game:GetService("VirtualUser")
+local VIM=game:GetService("VirtualInputManager")
 local CS=game:GetService("CollectionService")
 local UIS=game:GetService("UserInputService")
+local RunS=game:GetService("RunService")
 local TPS=game:GetService("TeleportService")
 local CommF=RS:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 P.Idled:Connect(function() VU:CaptureController() VU:ClickButton1(Vector2.new()) end)
 
--- UI
+-- UI ARRASTÁVEL
 local gui=Instance.new("ScreenGui") gui.Name="Kaitun" gui.ResetOnSpawn=false gui.Parent=PG
-local fr=Instance.new("Frame",gui) fr.Size=UDim2.new(0,280,0,90) fr.Position=UDim2.new(0,10,0,60)
-fr.BackgroundColor3=Color3.fromRGB(20,20,25) fr.BackgroundTransparency=0.2
+local fr=Instance.new("Frame",gui) fr.Size=UDim2.new(0,280,0,120) fr.Position=UDim2.new(0,10,0,60)
+fr.BackgroundColor3=Color3.fromRGB(20,20,25) fr.BackgroundTransparency=0.15
 Instance.new("UICorner",fr)
-local l1=Instance.new("TextLabel",fr) l1.Size=UDim2.new(1,-10,0,40) l1.Position=UDim2.new(0,5,0,5)
-l1.BackgroundTransparency=1 l1.TextColor3=Color3.new(1,1,1) l1.TextSize=14 l1.TextWrapped=true l1.Text="Iniciando..."
-local l2=l1:Clone() l2.Parent=fr l2.Position=UDim2.new(0,5,0,48) l2.TextSize=12 l2.TextColor3=Color3.fromRGB(180,180,180)
+local titulo=Instance.new("TextLabel",fr) titulo.Size=UDim2.new(1,0,0,24) titulo.Active=true
+titulo.BackgroundColor3=Color3.fromRGB(40,40,55) titulo.TextColor3=Color3.new(1,1,1)
+titulo.TextSize=13 titulo.Text="Kaitun  (arraste aqui)"
+Instance.new("UICorner",titulo)
+local l1=Instance.new("TextLabel",fr) l1.Size=UDim2.new(1,-10,0,36) l1.Position=UDim2.new(0,5,0,28)
+l1.BackgroundTransparency=1 l1.TextColor3=Color3.new(1,1,1) l1.TextSize=13 l1.TextWrapped=true l1.Text="Iniciando..."
+local l2=l1:Clone() l2.Parent=fr l2.Position=UDim2.new(0,5,0,64) l2.Size=UDim2.new(1,-10,0,20)
+l2.TextSize=12 l2.TextColor3=Color3.fromRGB(180,180,180)
+local rodando=true
+local btn=Instance.new("TextButton",fr) btn.Size=UDim2.new(1,-10,0,26) btn.Position=UDim2.new(0,5,0,88)
+btn.BackgroundColor3=Color3.fromRGB(60,140,80) btn.TextColor3=Color3.new(1,1,1) btn.TextSize=13 btn.Text="Pausar"
+Instance.new("UICorner",btn)
+btn.MouseButton1Click:Connect(function()
+    rodando=not rodando
+    btn.Text=rodando and "Pausar" or "Continuar"
+    btn.BackgroundColor3=rodando and Color3.fromRGB(60,140,80) or Color3.fromRGB(170,80,60)
+end)
+do
+    local arrastando,inicio,posIni
+    titulo.InputBegan:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+            arrastando=true inicio=i.Position posIni=fr.Position
+            i.Changed:Connect(function() if i.UserInputState==Enum.UserInputState.End then arrastando=false end end)
+        end
+    end)
+    UIS.InputChanged:Connect(function(i)
+        if arrastando and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
+            local d=i.Position-inicio
+            fr.Position=UDim2.new(posIni.X.Scale,posIni.X.Offset+d.X,posIni.Y.Scale,posIni.Y.Offset+d.Y)
+        end
+    end)
+end
 local cores={ok=Color3.fromRGB(80,220,120),warn=Color3.fromRGB(255,200,60),error=Color3.fromRGB(255,90,90)}
 local function SETT(m,k) l1.Text=m l1.TextColor3=cores[k] or Color3.new(1,1,1) end
 
@@ -51,7 +80,7 @@ local function UP()
     local lvl,beli,frag=getData()
     local ls=P:FindFirstChild("leaderstats")
     local b=ls and (ls:FindFirstChild("Bounty/Honor") or ls:FindFirstChild("Bounty"))
-    l2.Text=("Lv %d | Beli %d | Frags %d%s"):format(lvl,beli,frag,b and (" | Bounty "..b.Value) or "")
+    l2.Text=("Lv %d | Beli %d | Frags %d%s"):format(lvl,beli,frag,b and (" | B "..b.Value) or "")
 end
 local function GR() return P.Character and P.Character:FindFirstChild("HumanoidRootPart") end
 local function GH() return P.Character and P.Character:FindFirstChildOfClass("Humanoid") end
@@ -66,6 +95,51 @@ end
 local function equipar(n)
     local t,h=getTool(n),GH()
     if t and h and t.Parent~=P.Character then pcall(function() h:EquipTool(t) end) end
+end
+
+-- ESTABILIZAR (sem cair, sem colidir) + POSICIONAR + ATACAR
+local farmando=false
+RunS.Stepped:Connect(function()
+    if farmando and P.Character then
+        for _,p in ipairs(P.Character:GetDescendants()) do
+            if p:IsA("BasePart") then p.CanCollide=false end
+        end
+    end
+end)
+local function estabilizar(on)
+    farmando=on
+    local r=GR() if not r then return end
+    local bv=r:FindFirstChild("KaitunBV")
+    if on and not bv then
+        bv=Instance.new("BodyVelocity") bv.Name="KaitunBV"
+        bv.MaxForce=Vector3.new(1e9,1e9,1e9) bv.Velocity=Vector3.zero bv.Parent=r
+    elseif not on and bv then bv:Destroy() end
+end
+-- fica 4 studs na frente do alvo, olhando pra ele (só teleporta se estiver longe)
+local function grudar(mr)
+    local r=GR()
+    if not r or not mr then return end
+    local alvo=(mr.CFrame*CFrame.new(0,2,-4)).Position
+    if (r.Position-alvo).Magnitude>5 then
+        r.CFrame=CFrame.lookAt(alvo,mr.Position)
+    else
+        r.CFrame=CFrame.lookAt(r.Position,Vector3.new(mr.Position.X,r.Position.Y,mr.Position.Z))
+    end
+    r.AssemblyLinearVelocity=Vector3.zero
+end
+local function atacar(estilo)
+    equipar(estilo)
+    pcall(function()
+        local t=P.Character and P.Character:FindFirstChildOfClass("Tool")
+        if t then t:Activate() end
+        VU:CaptureController()
+        VU:Button1Down(Vector2.new(900,500),workspace.CurrentCamera.CFrame)
+        VU:Button1Up(Vector2.new(900,500),workspace.CurrentCamera.CFrame)
+    end)
+    pcall(function()
+        VIM:SendMouseButtonEvent(900,500,0,true,game,0)
+        VIM:SendMouseButtonEvent(900,500,0,false,game,0)
+    end)
 end
 
 -- MARES
@@ -123,7 +197,7 @@ local QuestPos={
     -- ["BanditQuest1"]=Vector3.new(x,y,z),
 }
 
--- ESTILOS (ordem da cadeia do God Human)
+-- ESTILOS
 local Estilos={
     {"Black Leg","BuyBlackLeg"},{"Electro","BuyElectro"},{"Fishman Karate","BuyFishmanKarate"},{"Dragon Claw","BuyDragonClaw"},
     {"Superhuman","BuySuperhuman"},{"Death Step","BuyDeathStep"},{"Sharkman Karate","BuySharkmanKarate"},
@@ -155,6 +229,7 @@ end
 -- VOO
 local function voarPara(pos,speed)
     speed=speed or 250
+    estabilizar(false)
     local hrp,h=GR(),GH()
     if not hrp or not h then return end
     local d=(pos-hrp.Position).Magnitude
@@ -170,7 +245,7 @@ local function irAoNPC(nomeQuest)
     if p then voarPara(p+Vector3.new(0,3,0),300) end
 end
 
--- INIMIGOS E COMBATE
+-- INIMIGOS
 local function acharMob(nome)
     local best,bd
     local hrp=GR()
@@ -203,29 +278,17 @@ local function questAtiva()
     local m=PG:FindFirstChild("Main") local q=m and m:FindFirstChild("Quest")
     return q and q.Visible
 end
-local function atacar(estilo)
-    equipar(estilo)
-    pcall(function()
-        VU:CaptureController() VU:ClickButton1(Vector2.new(900,500))
-        local t=P.Character and P.Character:FindFirstChildOfClass("Tool")
-        if t then t:Activate() end
-    end)
-end
 
--- VIDA SEGURA
+-- VIDA SEGURA (sobe uma vez e espera)
 local function vidaSegura()
     local h,r=GH(),GR()
     if not h or not r or h.Health/h.MaxHealth>=EX.SafeHP then return false end
     SETT("Vida baixa, regenerando...","warn")
-    local base=r.Position
-    h.PlatformStand=true
-    while h.Parent and h.Health>0 and h.Health/h.MaxHealth<0.85 do
-        r=GR() if not r then break end
-        r.CFrame=CFrame.new(base.X,base.Y+250,base.Z)
-        r.AssemblyLinearVelocity=Vector3.zero
-        task.wait(0.5)
-    end
-    h.PlatformStand=false
+    r.CFrame=r.CFrame+Vector3.new(0,120,0)
+    estabilizar(true)
+    local t0=tick()
+    while h.Parent and h.Health>0 and h.Health/h.MaxHealth<0.7 and tick()-t0<20 do task.wait(0.5) end
+    estabilizar(false)
     return true
 end
 
@@ -250,7 +313,7 @@ local function coletarBaus()
     end
 end
 
--- LOOPS PARALELOS (status, buso, frutas, rejoin, fps)
+-- LOOPS PARALELOS
 task.spawn(function()
     while EX.Stats do
         task.wait(5)
@@ -286,8 +349,7 @@ task.spawn(function()
 end)
 if EX.Rejoin then
     game:GetService("GuiService").ErrorMessageChanged:Connect(function()
-        task.wait(3)
-        TPS:Teleport(game.PlaceId,P)
+        task.wait(3) TPS:Teleport(game.PlaceId,P)
     end)
 end
 if EX.FPS then
@@ -301,7 +363,7 @@ if EX.FPS then
     end)
 end
 
--- Tecla K: copia sua posição (para preencher QuestPos)
+-- Tecla K: copia sua posição
 UIS.InputBegan:Connect(function(i,gp)
     if gp or i.KeyCode~=Enum.KeyCode.K then return end
     local r=GR() if not r then return end
@@ -311,7 +373,7 @@ UIS.InputBegan:Connect(function(i,gp)
     print("POS: "..s) SETT("Posição copiada: "..s,"ok")
 end)
 
--- ===== RAÇA V2 / V3 / V4 =====
+-- ===== RAÇA =====
 local FL={"Blue Flower","Red Flower","Yellow Flower"}
 local function racaInfo()
     local d=P:FindFirstChild("Data")
@@ -319,11 +381,6 @@ local function racaInfo()
     return r and tostring(r.Value) or "Human", r
 end
 local function temMarca(m) local _,r=racaInfo() return r and r:FindFirstChild(m)~=nil end
-do
-    local nome,r=racaInfo()
-    local t={} if r then for _,c in ipairs(r:GetChildren()) do t[#t+1]=c.Name end end
-    print("RACA:",nome,"| marcas:",table.concat(t,", "))
-end
 local function remoto(...)
     local a={...}
     local okk,res=pcall(function() return CommF:InvokeServer(table.unpack(a)) end)
@@ -340,15 +397,13 @@ local function cacarMob(nome,seg)
         return false
     end
     local mh=m:FindFirstChildOfClass("Humanoid")
-    local h=GH() if h then h.PlatformStand=true end
-    while mh and mh.Health>0 and m.Parent and tick()-t0<seg do
-        local mr,r,hh=m:FindFirstChild("HumanoidRootPart"),GR(),GH()
-        if not mr or not r or not hh or hh.Health/hh.MaxHealth<EX.SafeHP then break end
-        r.CFrame=mr.CFrame*CFrame.new(0,9,0)
-        r.AssemblyLinearVelocity=Vector3.zero
-        atacar(est) task.wait(0.1)
+    estabilizar(true)
+    while rodando and mh and mh.Health>0 and m.Parent and tick()-t0<seg do
+        local mr,hh=m:FindFirstChild("HumanoidRootPart"),GH()
+        if not mr or not hh or hh.Health/hh.MaxHealth<EX.SafeHP then break end
+        grudar(mr) atacar(est) task.wait(0.12)
     end
-    local h2=GH() if h2 then h2.PlatformStand=false end
+    estabilizar(false)
     return true
 end
 local function pegarObjeto(o)
@@ -413,8 +468,7 @@ local function corridaRaca()
     return racaV3() or v4Monitor()
 end
 
--- ===== AUTO BOUNTY =====
-pcall(function() CommF:InvokeServer("EnablePvp") end)
+-- ===== BOUNTY =====
 local amigos={}
 local function ehAmigo(pl)
     if amigos[pl.UserId]==nil then
@@ -444,12 +498,9 @@ local function cacarBounty()
     local pl=alvoBounty()
     if not pl then
         if EX.BountyHop and tick()-ultHop>30 then
-            ultHop=tick()
-            SETT("Sem alvos, trocando de server...","warn")
+            ultHop=tick() SETT("Sem alvos, trocando de server...","warn")
             pcall(function() TPS:Teleport(game.PlaceId,P) end)
-        else
-            SETT("Sem alvos no server","warn")
-        end
+        else SETT("Sem alvos no server","warn") end
         return false
     end
     SETT("Bounty: "..pl.Name,"warn")
@@ -457,21 +508,19 @@ local function cacarBounty()
     local r=c and c:FindFirstChild("HumanoidRootPart")
     if not r then return false end
     voarPara(r.Position+Vector3.new(0,8,0),300)
-    local h=GH() if h then h.PlatformStand=true end
+    estabilizar(true)
     local t0=tick()
-    while tick()-t0<25 do
+    while rodando and tick()-t0<25 do
         c=pl.Character
         r=c and c:FindFirstChild("HumanoidRootPart")
         local th=c and c:FindFirstChildOfClass("Humanoid")
-        local me,hh=GR(),GH()
-        if not r or not th or th.Health<=0 or not me or not hh then break end
+        local hh=GH()
+        if not r or not th or th.Health<=0 or not hh then break end
         if hh.Health/hh.MaxHealth<EX.SafeHP then break end
         if c:FindFirstChildOfClass("ForceField") then break end
-        me.CFrame=r.CFrame*CFrame.new(0,6,0)
-        me.AssemblyLinearVelocity=Vector3.zero
-        atacar(est) task.wait(0.1)
+        grudar(r) atacar(est) task.wait(0.12)
     end
-    local h2=GH() if h2 then h2.PlatformStand=false end
+    estabilizar(false)
     return true
 end
 local function bountyLiberado()
@@ -480,9 +529,11 @@ local function bountyLiberado()
     if EX.BountyAposEstilos and not todosProntos() then return false end
     return true
 end
+pcall(function() CommF:InvokeServer("EnablePvp") end)
 
 -- ===== LOOP PRINCIPAL =====
-local questAtual,ultMar,ultBau,ultGH,ultRaca=nil,0,0,0,0
+local questAtual,questIniciada=nil,0
+local ultMar,ultBau,ultGH,ultRaca=0,tick(),0,0
 local godOk=false
 UP() SETT("Kaitun iniciado!","ok")
 
@@ -490,6 +541,7 @@ task.spawn(function()
     while true do
         task.wait(0.3)
         pcall(UP)
+        if not rodando then estabilizar(false) SETT("Pausado","warn") task.wait(0.5) continue end
         local hrp,hum=GR(),GH()
         if not hrp or not hum or hum.Health<=0 then SETT("Aguardando respawn...","error") task.wait(2) continue end
 
@@ -498,7 +550,6 @@ task.spawn(function()
         local lvl=getData()
         local estilo=estiloAtual()
 
-        -- God Human
         if not godOk and todosProntos() and tick()-ultGH>20 then
             ultGH=tick()
             pcall(function() CommF:InvokeServer("BuyGodhuman") end)
@@ -506,28 +557,21 @@ task.spawn(function()
             if getTool("Godhuman") or getTool("God Human") then godOk=true SETT("God Human obtido!","ok") end
         end
 
-        -- baús
-        if EX.Chests and tick()-ultBau>180 then
-            ultBau=tick() coletarBaus() continue
-        end
+        if EX.Chests and tick()-ultBau>180 then ultBau=tick() coletarBaus() continue end
 
-        -- raça
         if EX.Raca and tick()-ultRaca>8 then
             ultRaca=tick()
             if corridaRaca() then continue end
         end
 
-        -- bounty (só no level máximo)
         if EX.Bounty and bountyLiberado() then
             if cacarBounty() then continue end
         end
 
-        -- troca de mar
         local marAlvo=marDoLvl(lvl)
         if marAlvo>mar then
             if tick()-ultMar>15 then
-                ultMar=tick()
-                SETT("Viajando pro Mar "..marAlvo,"warn")
+                ultMar=tick() SETT("Viajando pro Mar "..marAlvo,"warn")
                 pcall(function() CommF:InvokeServer(marAlvo==2 and "TravelDressrosa" or "TravelZou") end)
             end
             continue
@@ -537,43 +581,39 @@ task.spawn(function()
         if not q then continue end
         if marDoLvl(q[1])~=mar then SETT("Mar errado para o level "..lvl,"error") task.wait(3) continue end
 
-        -- quest
-        if questAtual and questAtual~=q[3]..q[4] then
-            pcall(function() CommF:InvokeServer("AbandonQuest") end)
-            questAtual=nil
-        end
-        if not questAtiva() then
+        -- QUEST: só (re)inicia se mudou, ou se acabou e já passaram 25s
+        local chave=q[3]..q[4]
+        if questAtual~=chave or (not questAtiva() and tick()-questIniciada>25) then
+            if questAtual and questAtual~=chave then
+                pcall(function() CommF:InvokeServer("AbandonQuest") end)
+            end
             irAoNPC(q[3])
             pcall(function() CommF:InvokeServer("StartQuest",q[3],q[4]) end)
+            questAtual=chave questIniciada=tick()
             task.wait(0.5)
-            if questAtiva() then questAtual=q[3]..q[4] end
         end
 
-        -- alvo
+        -- ALVO
         local mob=acharMob(q[2])
         if not mob then
             local sp=acharSpawn(q[2])
-            if sp then SETT("Indo até "..q[2],"warn") voarPara(sp.Position+Vector3.new(0,20,0),300)
+            if sp then SETT("Indo até "..q[2],"warn") voarPara(sp.Position+Vector3.new(0,20,0),300) task.wait(1)
             else SETT("Sem "..q[2].." (spawn não achado)","error") task.wait(2) end
             continue
         end
 
-        SETT((estilo or "Sem estilo").." "..(estilo and (getMastery(estilo).."/"..CF.Mastery) or "").." | "..q[2],"ok")
+        SETT((estilo or "Combat").." "..(estilo and (getMastery(estilo).."/"..CF.Mastery) or "").." | "..q[2],"ok")
         local mh=mob:FindFirstChildOfClass("Humanoid")
         local t0=tick()
-        hum.PlatformStand=true
-        while mh and mh.Health>0 and mob.Parent and tick()-t0<40 do
-            local hh=GH()
-            if not hh or hh.Health/hh.MaxHealth<EX.SafeHP then break end
-            local mr=mob:FindFirstChild("HumanoidRootPart")
-            local r=GR()
-            if not mr or not r then break end
-            r.CFrame=mr.CFrame*CFrame.new(0,9,0)
-            r.AssemblyLinearVelocity=Vector3.zero
+        estabilizar(true)
+        while rodando and mh and mh.Health>0 and mob.Parent and tick()-t0<40 do
+            local mr,hh=mob:FindFirstChild("HumanoidRootPart"),GH()
+            if not mr or not hh or hh.Health/hh.MaxHealth<EX.SafeHP then break end
+            grudar(mr)
             atacar(estilo or "Combat")
-            task.wait(0.1)
+            task.wait(0.12)
         end
-        hum.PlatformStand=false
+        estabilizar(false)
     end
 end)
 end)
