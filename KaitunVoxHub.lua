@@ -11,114 +11,70 @@ end
 setupAutoLoad()
 
 local ok,err=pcall(function()
-    local CF={MaxLvl=2800,TargetBty=10000000,SafeHP=20,Skip={"Buddha","T-Rex","Leopard","Dough"},V4=true,FarmDist=250,V4Cooldown=60}
+    local CF={MaxLvl=2800,SafeHP=20}
     local P=game.Players.LocalPlayer
     local PG=P:WaitForChild("PlayerGui")
     local UIS=game:GetService("UserInputService")
-    local TS=game:GetService("TeleportService")
-    local HS=game:GetService("HttpService")
     local R=Color3.fromRGB
+    local RunService = game:GetService("RunService")
+    
+    -- Serviços e Remotes do Blox Fruits
     local RS = game:GetService("ReplicatedStorage")
-    local Remotes = RS:WaitForChild("Remotes")
-    local CommF = Remotes:WaitForChild("CommF_")
+    local Remotes = RS:FindFirstChild("Remotes")
+    local CommF = Remotes and Remotes:FindFirstChild("CommF_")
+    local CombatRemote = Remotes and Remotes:FindFirstChild("Combat")
 
     local CORES={
-        FundoMenu=R(15,17,24),
-        FundoCard=R(24,27,38),
-        TextoBranco=R(255,255,255),
-        TextoCinza=R(130,135,150),
-        TextoVerde=R(100,230,150),
-        TextoRoxo=R(180,150,255),
-        TextoMissing=R(220,220,220),
-        FundoBotao=R(40,45,65),
-        Divisor=R(35,38,50),
+        FundoMenu=R(15,17,24), FundoCard=R(24,27,38), TextoBranco=R(255,255,255),
+        TextoCinza=R(130,135,150), TextoVerde=R(100,230,150), TextoRoxo=R(180,150,255),
+        TextoMissing=R(220,220,220), FundoBotao=R(40,45,65), Divisor=R(35,38,50),
     }
 
     local function aplicarCanto(o,r)
-        local c=Instance.new("UICorner")
-        c.CornerRadius=UDim.new(0,r)
-        c.Parent=o
+        local c=Instance.new("UICorner") c.CornerRadius=UDim.new(0,r) c.Parent=o
     end
     local function criarTexto(pai,texto,tam,pos,cor,neg,tamFonte)
         local l=Instance.new("TextLabel")
-        l.Parent=pai
-        l.BackgroundTransparency=1
-        l.Size=tam
-        l.Position=pos
-        l.Text=texto
-        l.TextColor3=cor
-        l.Font=neg and Enum.Font.GothamBold or Enum.Font.Gotham
-        l.TextSize=tamFonte or 12
-        l.TextXAlignment=Enum.TextXAlignment.Left
+        l.Parent=pai; l.BackgroundTransparency=1; l.Size=tam; l.Position=pos
+        l.Text=texto; l.TextColor3=cor; l.Font=neg and Enum.Font.GothamBold or Enum.Font.Gotham
+        l.TextSize=tamFonte or 12; l.TextXAlignment=Enum.TextXAlignment.Left
         return l
     end
 
     local SG=Instance.new("ScreenGui")
-    SG.Name="KaitunMenu"
-    SG.ResetOnSpawn=false
-    SG.IgnoreGuiInset=true
-    SG.Parent=PG
-
-    local scale = Instance.new("UIScale")
-    scale.Parent = SG
-    scale.Scale = UIS.TouchEnabled and 0.8 or 0.95
+    SG.Name="KaitunMenu"; SG.ResetOnSpawn=false; SG.IgnoreGuiInset=true; SG.Parent=PG
+    local scale = Instance.new("UIScale") scale.Parent = SG scale.Scale = UIS.TouchEnabled and 0.8 or 0.95
 
     local menu=Instance.new("Frame")
-    menu.Name="MenuPrincipal"
-    menu.Parent=SG
-    menu.Size=UDim2.new(0,350,0,460)
-    menu.Position=UDim2.new(0.5,-175,0.5,-230)
-    menu.BackgroundColor3=CORES.FundoMenu
-    menu.BorderSizePixel=0
-    aplicarCanto(menu,10)
+    menu.Name="MenuPrincipal"; menu.Parent=SG
+    menu.Size=UDim2.new(0,350,0,460); menu.Position=UDim2.new(0.5,-175,0.5,-230)
+    menu.BackgroundColor3=CORES.FundoMenu; menu.BorderSizePixel=0; aplicarCanto(menu,10)
 
     local cabecalho=Instance.new("Frame")
-    cabecalho.Parent=menu
-    cabecalho.Size=UDim2.new(1,0,0,45)
-    cabecalho.BackgroundTransparency=1
+    cabecalho.Parent=menu; cabecalho.Size=UDim2.new(1,0,0,45); cabecalho.BackgroundTransparency=1
 
     local botaoKaitun=Instance.new("TextButton")
-    botaoKaitun.Parent=cabecalho
-    botaoKaitun.Size=UDim2.new(0,80,0,28)
-    botaoKaitun.Position=UDim2.new(1,-100,0,10)
-    botaoKaitun.BackgroundColor3=CORES.FundoBotao
-    botaoKaitun.Text="Kaitun"
-    botaoKaitun.TextColor3=CORES.TextoBranco
-    botaoKaitun.Font=Enum.Font.GothamBold
-    botaoKaitun.TextSize=11
-    aplicarCanto(botaoKaitun,6)
+    botaoKaitun.Parent=cabecalho; botaoKaitun.Size=UDim2.new(0,80,0,28); botaoKaitun.Position=UDim2.new(1,-100,0,10)
+    botaoKaitun.BackgroundColor3=CORES.FundoBotao; botaoKaitun.Text="Kaitun"
+    botaoKaitun.TextColor3=CORES.TextoBranco; botaoKaitun.Font=Enum.Font.GothamBold; botaoKaitun.TextSize=11; aplicarCanto(botaoKaitun,6)
 
     local botaoMin=Instance.new("TextButton")
-    botaoMin.Parent=cabecalho
-    botaoMin.Size=UDim2.new(0,30,0,30)
-    botaoMin.Position=UDim2.new(1,-35,0,8)
-    botaoMin.BackgroundTransparency=1
-    botaoMin.Text="—"
-    botaoMin.TextColor3=CORES.TextoCinza
-    botaoMin.Font=Enum.Font.GothamBold
-    botaoMin.TextSize=18
+    botaoMin.Parent=cabecalho; botaoMin.Size=UDim2.new(0,30,0,30); botaoMin.Position=UDim2.new(1,-35,0,8)
+    botaoMin.BackgroundTransparency=1; botaoMin.Text="—"; botaoMin.TextColor3=CORES.TextoCinza
+    botaoMin.Font=Enum.Font.GothamBold; botaoMin.TextSize=18
 
     local divisor=Instance.new("Frame")
-    divisor.Parent=menu
-    divisor.Size=UDim2.new(1,-20,0,1)
-    divisor.Position=UDim2.new(0,10,0,45)
-    divisor.BackgroundColor3=CORES.Divisor
-    divisor.BorderSizePixel=0
+    divisor.Parent=menu; divisor.Size=UDim2.new(1,-20,0,1); divisor.Position=UDim2.new(0,10,0,45)
+    divisor.BackgroundColor3=CORES.Divisor; divisor.BorderSizePixel=0
 
     local containerStats=Instance.new("Frame")
-    containerStats.Parent=menu
-    containerStats.Size=UDim2.new(1,-20,0,120)
-    containerStats.Position=UDim2.new(0,10,0,55)
+    containerStats.Parent=menu; containerStats.Size=UDim2.new(1,-20,0,120); containerStats.Position=UDim2.new(0,10,0,55)
     containerStats.BackgroundTransparency=1
 
     local function criarCard(pai,label,valor,cor,x,y)
         local card=Instance.new("Frame")
-        card.Parent=pai
-        card.Size=UDim2.new(0.48,0,0,55)
-        card.Position=UDim2.new(x,0,y,0)
-        card.BackgroundColor3=CORES.FundoCard
-        card.BorderSizePixel=0
-        aplicarCanto(card,8)
+        card.Parent=pai; card.Size=UDim2.new(0.48,0,0,55); card.Position=UDim2.new(x,0,y,0)
+        card.BackgroundColor3=CORES.FundoCard; card.BorderSizePixel=0; aplicarCanto(card,8)
         criarTexto(card,label,UDim2.new(1,-10,0,15),UDim2.new(0,8,0,8),CORES.TextoCinza,false,10)
         local tv=criarTexto(card,valor,UDim2.new(1,-10,0,25),UDim2.new(0,8,0,26),cor,false,18)
         return tv
@@ -130,12 +86,8 @@ local ok,err=pcall(function()
     local cardFrag=criarCard(containerStats,"Fragments","-",CORES.TextoRoxo,0.52,0.55)
 
     local containerCol=Instance.new("Frame")
-    containerCol.Parent=menu
-    containerCol.Size=UDim2.new(1,-20,0,235)
-    containerCol.Position=UDim2.new(0,10,0,185)
-    containerCol.BackgroundColor3=CORES.FundoCard
-    containerCol.BorderSizePixel=0
-    aplicarCanto(containerCol,8)
+    containerCol.Parent=menu; containerCol.Size=UDim2.new(1,-20,0,235); containerCol.Position=UDim2.new(0,10,0,185)
+    containerCol.BackgroundColor3=CORES.FundoCard; containerCol.BorderSizePixel=0; aplicarCanto(containerCol,8)
 
     criarTexto(containerCol,"Collection",UDim2.new(1,0,0,15),UDim2.new(0,10,0,8),CORES.TextoCinza,false,10)
 
@@ -149,20 +101,12 @@ local ok,err=pcall(function()
     end
 
     local containerStatus=Instance.new("Frame")
-    containerStatus.Parent=menu
-    containerStatus.Size=UDim2.new(1,-20,0,45)
-    containerStatus.Position=UDim2.new(0,10,0,435)
-    containerStatus.BackgroundColor3=CORES.FundoCard
-    containerStatus.BorderSizePixel=0
-    aplicarCanto(containerStatus,8)
+    containerStatus.Parent=menu; containerStatus.Size=UDim2.new(1,-20,0,45); containerStatus.Position=UDim2.new(0,10,0,435)
+    containerStatus.BackgroundColor3=CORES.FundoCard; containerStatus.BorderSizePixel=0; aplicarCanto(containerStatus,8)
 
     local bolinha=Instance.new("Frame")
-    bolinha.Parent=containerStatus
-    bolinha.Size=UDim2.new(0,7,0,7)
-    bolinha.Position=UDim2.new(0,10,0,12)
-    bolinha.BackgroundColor3=R(80,200,120)
-    bolinha.BorderSizePixel=0
-    aplicarCanto(bolinha,100)
+    bolinha.Parent=containerStatus; bolinha.Size=UDim2.new(0,7,0,7); bolinha.Position=UDim2.new(0,10,0,12)
+    bolinha.BackgroundColor3=R(80,200,120); bolinha.BorderSizePixel=0; aplicarCanto(bolinha,100)
 
     criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,12),UDim2.new(0,22,0,8),CORES.TextoCinza,false,9)
     local statusTask=criarTexto(containerStatus,"Aguardando...",UDim2.new(1,0,0,15),UDim2.new(0,10,0,24),CORES.TextoBranco,false,11)
@@ -226,25 +170,15 @@ local ok,err=pcall(function()
             if data:FindFirstChild("Beli") then beli = data.Beli.Value end
             if data:FindFirstChild("Fragments") then frag = data.Fragments.Value end
             if data:FindFirstChild("Race") then race = tostring(data.Race.Value) end
-        else
-            local ls = P:FindFirstChild("leaderstats")
-            if ls then
-                if ls:FindFirstChild("Level") then lvl = ls.Level.Value end
-                if ls:FindFirstChild("Beli") then beli = ls.Beli.Value end
-            end
         end
         return lvl, beli, frag, race
     end
 
     local function hasItem(name)
         local bp=P:FindFirstChild("Backpack")
-        if bp then
-            for _,v in ipairs(bp:GetChildren()) do if v:IsA("Tool") and v.Name:find(name,1,true) then return true end end
-        end
+        if bp then for _,v in ipairs(bp:GetChildren()) do if v:IsA("Tool") and v.Name:find(name,1,true) then return true end end end
         local c=P.Character
-        if c then
-            for _,v in ipairs(c:GetChildren()) do if v:IsA("Tool") and v.Name:find(name,1,true) then return true end end
-        end
+        if c then for _,v in ipairs(c:GetChildren()) do if v:IsA("Tool") and v.Name:find(name,1,true) then return true end end end
         return false
     end
 
@@ -264,63 +198,123 @@ local ok,err=pcall(function()
         elseif status=="warn" then bolinha.BackgroundColor3=R(255,200,50) end
     end
 
-    -- ==========================================
-    -- SISTEMA DE VOO E QUESTS
-    -- ==========================================
     local function GR() return P.Character and P.Character:FindFirstChild("HumanoidRootPart") end
     local function GH() return P.Character and P.Character:FindFirstChild("Humanoid") end
 
-    -- Função de Voo (em vez de teleporte seco)
+    -- VOO
+    local voando = false
+    local voarAtivo = true
+    local function IniciarVoo()
+        if voando then return end
+        voando = true
+        local hrp = GR()
+        if not hrp then voando = false return end
+        local bv = Instance.new("BodyVelocity")
+        bv.Name = "KaitunFly"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge); bv.Velocity = Vector3.new(0,0,0); bv.Parent = hrp
+        local connection
+        connection = RunService.Heartbeat:Connect(function()
+            if not voarAtivo or not GR() or not GH().Parent then
+                if connection then connection:Disconnect() end
+                if bv then bv:Destroy() end
+                voando = false
+                return
+            end
+            if bv.Velocity.Magnitude < 1 then bv.Velocity = Vector3.new(0, 2, 0) end
+        end)
+    end
+
     local function VoarPara(posicao)
         local hrp = GR()
         if not hrp then return end
-        local bv = Instance.new("BodyVelocity")
-        bv.Parent = hrp
-        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        
-        local tempo = 0
-        while tempo < 1.5 do
+        IniciarVoo()
+        local bv = hrp:FindFirstChild("KaitunFly")
+        if not bv then return end
+        local velocidade = 120
+        while (posicao - hrp.Position).Magnitude > 10 do
             if not hrp or not hrp.Parent then break end
-            local direcao = (posicao - hrp.Position).Unit
-            bv.Velocity = direcao * 250 -- Velocidade do voo
+            local novaDirecao = (posicao - hrp.Position).Unit
+            bv.Velocity = novaDirecao * velocidade
             task.wait(0.1)
-            tempo = tempo + 0.1
-            if (posicao - hrp.Position).Magnitude < 15 then break end
         end
-        bv:Destroy()
+        bv.Velocity = Vector3.new(0,0,0)
     end
 
+    -- ==========================================
+    -- AUTO QUEST E AUTO COLETAR
+    -- ==========================================
+    
+    -- Mapeamento de níveis para nomes de ilhas (para o script saber para onde ir)
+    local Ilhas = {
+        [1] = "Bandits", [10] = "Mob", [15] = "Snow Bandits", [30] = "Desert Bandits",
+        [60] = "Frost Bandits", [75] = "Sky Bandits", [120] = "Marine", [150] = "Pirate",
+        [190] = "Swan", [250] = "Magma", [300] = "Fishman", [375] = "Cursed Ship",
+        [500] = "Zombie", [625] = "Bounty", [750] = "Soul", [1000] = "Fist",
+        [1200] = "Haunted", [1500] = "Sea", [1750] = "Vampire", [2000] = "Pirate",
+        [2200] = "Raider", [2400] = "Mythical", [2600] = "Fountain"
+    }
+
+    local function obterIlhaAtual(lvl)
+        local ilhaAlvo = "Bandits"
+        for nvl, nome in pairs(Ilhas) do
+            if lvl >= nvl then ilhaAlvo = nome end
+        end
+        return ilhaAlvo
+    end
+
+    -- Função para aceitar Quest no NPC (via remote)
     local function AceitarQuest()
-        SETT("Pegando Quest...", "warn")
+        SETT("Aceitando Quest...", "warn")
+        local lvl = getData()
+        local ilha = obterIlhaAtual(lvl)
+        
+        -- Tenta usar o Comando Remoto para teleportar para o NPC de Quest
         pcall(function()
-            -- Tenta se teleportar para o NPC de quest atual do jogador
-            CommF:InvokeServer("Teleport", "Quest")
-            task.wait(1)
-            -- Tenta aceitar a quest via prompt do NPC
-            local NPC = workspace:FindFirstChild("Quest")
-            if NPC and NPC:FindFirstChild("HumanoidRootPart") then
-                VoarPara(NPC.HumanoidRootPart.Position)
-                task.wait(0.5)
-                local prompt = NPC.HumanoidRootPart:FindFirstChild("ProximityPrompt")
-                if prompt then
-                    fireproximityprompt(prompt) -- Função do executor mobile/pc
-                else
-                    CommF:InvokeServer("AcceptQuest") -- Fallback
-                end
+            if CommF then CommF:InvokeServer("Teleport", "Quest") end
+        end)
+        task.wait(1.5)
+        
+        -- Tenta aceitar via comando remoto
+        pcall(function()
+            if CommF then 
+                CommF:InvokeServer("AcceptQuest", ilha) 
             end
         end)
         task.wait(1)
+        SETT("Quest Aceita!", "ok")
     end
 
+    -- Função para coletar itens no chão e baús
+    local function ColetarItens()
+        local hrp = GR()
+        if not hrp then return end
+        
+        -- Procura por baús (Chests) no workspace
+        for _, obj in ipairs(workspace:GetChildren()) do
+            if obj.Name:find("Chest") or obj.Name:find("Chest") then
+                local prompt = obj:FindFirstChild("ProximityPrompt")
+                if prompt then
+                    SETT("Coletando Baú...", "ok")
+                    VoarPara(obj.Position)
+                    task.wait(0.5)
+                    pcall(function()
+                        if fireproximityprompt then fireproximityprompt(prompt) end
+                        if CommF then CommF:InvokeServer("Chest", "Collect") end
+                    end)
+                    task.wait(0.5)
+                end
+            end
+        end
+    end
+
+    -- Procura por inimigos da quest atual
     local function findTarget()
         local r = GR()
         if not r then return nil end
-        local best, bestD = nil, CF.FarmDist
+        local best, bestD = nil, 250
         for _, obj in ipairs(workspace:GetChildren()) do
-            if obj:IsA("Model") then
+            if obj:IsA("Model") and obj ~= P.Character and obj.Name ~= "Quest" then
                 local h = obj:FindFirstChild("Humanoid")
-                -- Procura mobs com HP especifico para não bater em chefes
-                if h and h.Health > 0 and h.MaxHealth < 5000 and obj ~= P.Character and obj.Name ~= "Quest" then
+                if h and h.Health > 0 and h.MaxHealth < 5000 and h.MaxHealth > 10 then
                     local hrp = obj:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         local d = (r.Position - hrp.Position).Magnitude
@@ -348,25 +342,23 @@ local ok,err=pcall(function()
         
         local tgt = findTarget()
         if not tgt then
-            SETT("Nenhum mob. Pegando Quest...", "warn")
+            SETT("Procurando Quest...", "warn")
             AceitarQuest()
-            task.wait(2)
             return
         end
         
-        -- Usa o Voo em vez do Teleporte
         if (tgt.Position - r.Position).Magnitude > 30 then 
             SETT("Voando até o mob...", "ok")
             VoarPara(tgt.Position) 
         end
         
         SETT("Atacando Mobs...", "ok")
-        
         for i = 1, 15 do
             local h2, r2 = GH(), GR()
             if not h2 or not r2 then break end
             if (h2.Health/h2.MaxHealth) < (CF.SafeHP/100) then 
-                VoarPara(r2.Position + Vector3.new(0, 500, 0)) -- Foge voando pra cima
+                SETT("Fugindo (HP Baixo)...", "error")
+                VoarPara(r2.Position + Vector3.new(0, 500, 0))
                 task.wait(3)
                 break 
             end
@@ -378,6 +370,9 @@ local ok,err=pcall(function()
             atacar(t2)
             task.wait(0.1)
         end
+        
+        -- Depois de atacar, tenta coletar baús próximos
+        ColetarItens()
     end
 
     UP()
@@ -395,8 +390,8 @@ local ok,err=pcall(function()
                 if lvl < CF.MaxLvl then
                     doFarm()
                 else
-                    SETT("Level Máximo! Procurando Bounty...", "ok")
-                    -- Aqui entraria o doBounty()
+                    SETT("Level Máximo alcançado! Coletando itens...", "ok")
+                    ColetarItens()
                 end
             end
         end
