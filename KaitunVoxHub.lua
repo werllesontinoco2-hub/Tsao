@@ -1,7 +1,8 @@
 -- Cole o link onde este script está hospedado (para reabrir sozinho após trocar de server)
-local LINK="SEU_LINK_AQUI"
+local LINK="https://raw.githubusercontent.com/werllesontinoco2-hub/Tsao/main/KaitunVoxHub.lua"
+
 pcall(function()
-    if queue_on_teleport and LINK~="SEU_LINK_AQUI" then
+    if queue_on_teleport and LINK~="https://raw.githubusercontent.com/werllesontinoco2-hub/Tsao/main/KaitunVoxHub.lua" then
         queue_on_teleport('loadstring(game:HttpGet("'..LINK..'"))()')
     end
 end)
