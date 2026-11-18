@@ -7,7 +7,7 @@ local function setupAutoLoad()
         end
         queueFunc(scriptSource)
     else
-        warn("[Kaitun] Seu executor nao suporta queue_on_teleport. Use o AutoExecute do executor.")
+        warn("[Kaitun] Seu executor nao suporta queue_on_teleport.")
     end
 end
 setupAutoLoad()
@@ -38,7 +38,7 @@ local ok,err=pcall(function()
         c.CornerRadius=UDim.new(0,r)
         c.Parent=o
     end
-    local function criarTexto(pai,texto,tam,pos,cor,neg)
+    local function criarTexto(pai,texto,tam,pos,cor,neg,tamFonte)
         local l=Instance.new("TextLabel")
         l.Parent=pai
         l.BackgroundTransparency=1
@@ -47,7 +47,7 @@ local ok,err=pcall(function()
         l.Text=texto
         l.TextColor3=cor
         l.Font=neg and Enum.Font.GothamBold or Enum.Font.Gotham
-        l.TextSize=16
+        l.TextSize=tamFonte or 12 -- Fonte padrão menor
         l.TextXAlignment=Enum.TextXAlignment.Left
         return l
     end
@@ -58,112 +58,116 @@ local ok,err=pcall(function()
     SG.IgnoreGuiInset=true
     SG.Parent=PG
 
+    -- MENU MENOR: 400x480
     local menu=Instance.new("Frame")
     menu.Name="MenuPrincipal"
     menu.Parent=SG
-    menu.Size=UDim2.new(0,600,0,650)
-    menu.Position=UDim2.new(0.5,-300,0.5,-325)
+    menu.Size=UDim2.new(0,400,0,480)
+    menu.Position=UDim2.new(0.5,-200,0.5,-240)
     menu.BackgroundColor3=CORES.FundoMenu
     menu.BorderSizePixel=0
     aplicarCanto(menu,12)
 
     local cabecalho=Instance.new("Frame")
     cabecalho.Parent=menu
-    cabecalho.Size=UDim2.new(1,0,0,60)
+    cabecalho.Size=UDim2.new(1,0,0,50)
     cabecalho.BackgroundTransparency=1
 
     local botaoKaitun=Instance.new("TextButton")
     botaoKaitun.Parent=cabecalho
-    botaoKaitun.Size=UDim2.new(0,100,0,35)
-    botaoKaitun.Position=UDim2.new(1,-130,0,12)
+    botaoKaitun.Size=UDim2.new(0,80,0,30)
+    botaoKaitun.Position=UDim2.new(1,-100,0,10)
     botaoKaitun.BackgroundColor3=CORES.FundoBotao
     botaoKaitun.Text="Kaitun"
     botaoKaitun.TextColor3=CORES.TextoBranco
     botaoKaitun.Font=Enum.Font.GothamBold
-    botaoKaitun.TextSize=14
+    botaoKaitun.TextSize=12
     botaoKaitun.AutoButtonColor=false
-    aplicarCanto(botaoKaitun,8)
+    aplicarCanto(botaoKaitun,6)
 
     local botaoMin=Instance.new("TextButton")
     botaoMin.Parent=cabecalho
-    botaoMin.Size=UDim2.new(0,30,0,30)
-    botaoMin.Position=UDim2.new(1,-40,0,15)
+    botaoMin.Size=UDim2.new(0,25,0,25)
+    botaoMin.Position=UDim2.new(1,-30,0,12)
     botaoMin.BackgroundTransparency=1
     botaoMin.Text="—"
     botaoMin.TextColor3=CORES.TextoCinza
     botaoMin.Font=Enum.Font.GothamBold
-    botaoMin.TextSize=18
+    botaoMin.TextSize=16
 
     local divisor=Instance.new("Frame")
     divisor.Parent=menu
-    divisor.Size=UDim2.new(1,-40,0,1)
-    divisor.Position=UDim2.new(0,20,0,60)
+    divisor.Size=UDim2.new(1,-30,0,1)
+    divisor.Position=UDim2.new(0,15,0,50)
     divisor.BackgroundColor3=CORES.Divisor
     divisor.BorderSizePixel=0
 
+    -- STATS (Menor)
     local containerStats=Instance.new("Frame")
     containerStats.Parent=menu
-    containerStats.Size=UDim2.new(1,-40,0,200)
-    containerStats.Position=UDim2.new(0,20,0,80)
+    containerStats.Size=UDim2.new(1,-30,0,140)
+    containerStats.Position=UDim2.new(0,15,0,65)
     containerStats.BackgroundTransparency=1
 
     local function criarCard(pai,label,valor,cor,x,y)
         local card=Instance.new("Frame")
         card.Parent=pai
-        card.Size=UDim2.new(0.48,0,0,90)
+        card.Size=UDim2.new(0.48,0,0,65)
         card.Position=UDim2.new(x,0,y,0)
         card.BackgroundColor3=CORES.FundoCard
         card.BorderSizePixel=0
-        aplicarCanto(card,10)
-        criarTexto(card,label,UDim2.new(1,-20,0,20),UDim2.new(0,15,0,15),CORES.TextoCinza,false)
-        local tv=criarTexto(card,valor,UDim2.new(1,-20,0,40),UDim2.new(0,15,0,40),cor,false)
-        tv.TextSize=28
+        aplicarCanto(card,8)
+        criarTexto(card,label,UDim2.new(1,-15,0,15),UDim2.new(0,10,0,10),CORES.TextoCinza,false,10)
+        local tv=criarTexto(card,valor,UDim2.new(1,-15,0,25),UDim2.new(0,10,0,30),cor,false,20)
         return tv
     end
 
     local cardLvl=criarCard(containerStats,"Level","-",CORES.TextoBranco,0,0)
     local cardRace=criarCard(containerStats,"Race","-",CORES.TextoBranco,0.52,0)
-    local cardBeli=criarCard(containerStats,"Beli","-",CORES.TextoVerde,0,0.5)
-    local cardFrag=criarCard(containerStats,"Fragments","-",CORES.TextoRoxo,0.52,0.5)
+    local cardBeli=criarCard(containerStats,"Beli","-",CORES.TextoVerde,0,0.55)
+    local cardFrag=criarCard(containerStats,"Fragments","-",CORES.TextoRoxo,0.52,0.55)
 
+    -- COLLECTION (Menor)
     local containerCol=Instance.new("Frame")
     containerCol.Parent=menu
-    containerCol.Size=UDim2.new(1,-40,0,260)
-    containerCol.Position=UDim2.new(0,20,0,290)
+    containerCol.Size=UDim2.new(1,-30,0,190)
+    containerCol.Position=UDim2.new(0,15,0,215)
     containerCol.BackgroundColor3=CORES.FundoCard
     containerCol.BorderSizePixel=0
-    aplicarCanto(containerCol,10)
+    aplicarCanto(containerCol,8)
 
-    criarTexto(containerCol,"Collection",UDim2.new(1,0,0,20),UDim2.new(0,15,0,15),CORES.TextoCinza,false)
+    criarTexto(containerCol,"Collection",UDim2.new(1,0,0,15),UDim2.new(0,10,0,10),CORES.TextoCinza,false,11)
 
     local ITENS={"Cursed Dual Katana","Valkyrie Helm","Skull Guitar","Mirror Fractal","Pull Lever"}
     local itemLabels={}
     for i,nome in ipairs(ITENS) do
-        local y=50+((i-1)*35)
-        criarTexto(containerCol,nome,UDim2.new(0,200,0,20),UDim2.new(0,15,0,y),CORES.TextoBranco,false)
-        itemLabels[i]=criarTexto(containerCol,"Missing",UDim2.new(0,100,0,20),UDim2.new(1,-115,0,y),CORES.TextoMissing,false)
+        local y=30+((i-1)*28)
+        criarTexto(containerCol,nome,UDim2.new(0,200,0,15),UDim2.new(0,10,0,y),CORES.TextoBranco,false,11)
+        itemLabels[i]=criarTexto(containerCol,"Missing",UDim2.new(0,70,0,15),UDim2.new(1,-80,0,y),CORES.TextoMissing,false,11)
         itemLabels[i].TextXAlignment=Enum.TextXAlignment.Right
     end
 
+    -- STATUS (Menor)
     local containerStatus=Instance.new("Frame")
     containerStatus.Parent=menu
-    containerStatus.Size=UDim2.new(1,-40,0,70)
-    containerStatus.Position=UDim2.new(0,20,0,560)
+    containerStatus.Size=UDim2.new(1,-30,0,55)
+    containerStatus.Position=UDim2.new(0,15,0,415)
     containerStatus.BackgroundColor3=CORES.FundoCard
     containerStatus.BorderSizePixel=0
-    aplicarCanto(containerStatus,10)
+    aplicarCanto(containerStatus,8)
 
     local bolinha=Instance.new("Frame")
     bolinha.Parent=containerStatus
-    bolinha.Size=UDim2.new(0,10,0,10)
-    bolinha.Position=UDim2.new(0,15,0,18)
+    bolinha.Size=UDim2.new(0,8,0,8)
+    bolinha.Position=UDim2.new(0,10,0,14)
     bolinha.BackgroundColor3=R(80,200,120)
     bolinha.BorderSizePixel=0
     aplicarCanto(bolinha,100)
 
-    criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,20),UDim2.new(0,35,0,13),CORES.TextoCinza,false)
-    local statusTask=criarTexto(containerStatus,"Idle",UDim2.new(1,0,0,20),UDim2.new(0,15,0,38),CORES.TextoBranco,false)
+    criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,15),UDim2.new(0,25,0,10),CORES.TextoCinza,false,10)
+    local statusTask=criarTexto(containerStatus,"Idle",UDim2.new(1,0,0,15),UDim2.new(0,10,0,30),CORES.TextoBranco,false,12)
 
+    -- Arrastar
     local arrastando=false
     local inicioArrasto,posInicial
     cabecalho.InputBegan:Connect(function(inp)
@@ -185,6 +189,7 @@ local ok,err=pcall(function()
         end
     end)
 
+    -- Minimizar
     local minimizado=false
     botaoMin.MouseButton1Click:Connect(function()
         if not minimizado then
@@ -193,13 +198,14 @@ local ok,err=pcall(function()
             local reabrir=Instance.new("TextButton")
             reabrir.Name="Reabrir"
             reabrir.Parent=SG
-            reabrir.Size=UDim2.new(0,100,0,40)
+            reabrir.Size=UDim2.new(0,80,0,30)
             reabrir.Position=UDim2.new(0,20,0,20)
             reabrir.BackgroundColor3=CORES.FundoMenu
             reabrir.Text="Kaitun"
             reabrir.TextColor3=CORES.TextoBranco
             reabrir.Font=Enum.Font.GothamBold
-            aplicarCanto(reabrir,8)
+            reabrir.TextSize=12
+            aplicarCanto(reabrir,6)
             reabrir.MouseButton1Click:Connect(function()
                 menu.Visible=true
                 reabrir:Destroy()
