@@ -18,6 +18,9 @@ local ok,err=pcall(function()
     local TS=game:GetService("TeleportService")
     local HS=game:GetService("HttpService")
     local R=Color3.fromRGB
+    local RS = game:GetService("ReplicatedStorage")
+    local Remotes = RS:WaitForChild("Remotes")
+    local CommF = Remotes:WaitForChild("CommF_")
 
     local CORES={
         FundoMenu=R(15,17,24),
@@ -126,7 +129,6 @@ local ok,err=pcall(function()
     local cardBeli=criarCard(containerStats,"Beli","-",CORES.TextoVerde,0,0.55)
     local cardFrag=criarCard(containerStats,"Fragments","-",CORES.TextoRoxo,0.52,0.55)
 
-    -- AUMENTEI O ESPAÇO DA COLEÇÃO PARA PREENCHER O MENU
     local containerCol=Instance.new("Frame")
     containerCol.Parent=menu
     containerCol.Size=UDim2.new(1,-20,0,235)
@@ -165,32 +167,23 @@ local ok,err=pcall(function()
     criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,12),UDim2.new(0,22,0,8),CORES.TextoCinza,false,9)
     local statusTask=criarTexto(containerStatus,"Aguardando...",UDim2.new(1,0,0,15),UDim2.new(0,10,0,24),CORES.TextoBranco,false,11)
 
-    -- SISTEMA DE ARRASTAR MELHORADO
     local dragging, dragInput, dragStart, startPos
     local function updateDrag(input)
         local delta = input.Position - dragStart
         menu.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
-
     cabecalho.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = menu.Position
+            dragging = true; dragStart = input.Position; startPos = menu.Position
         end
     end)
     UIS.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            updateDrag(input)
-        end
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then updateDrag(input) end
     end)
     UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end)
 
-    -- Minimizar
     local minimizado=false
     local botaoFlutuante
     local draggingBtn = false
@@ -198,26 +191,15 @@ local ok,err=pcall(function()
 
     botaoMin.MouseButton1Click:Connect(function()
         if not minimizado then
-            minimizado=true
-            menu.Visible=false
+            minimizado=true; menu.Visible=false
             botaoFlutuante=Instance.new("TextButton")
-            botaoFlutuante.Parent=SG
-            botaoFlutuante.Size=UDim2.new(0,70,0,70)
-            botaoFlutuante.Position=UDim2.new(0,20,0,20)
-            botaoFlutuante.BackgroundColor3=CORES.FundoMenu
-            botaoFlutuante.Text="K"
-            botaoFlutuante.TextColor3=CORES.TextoBranco
-            botaoFlutuante.Font=Enum.Font.GothamBold
-            botaoFlutuante.TextSize=24
-            aplicarCanto(botaoFlutuante,10)
-
+            botaoFlutuante.Parent=SG; botaoFlutuante.Size=UDim2.new(0,70,0,70); botaoFlutuante.Position=UDim2.new(0,20,0,20)
+            botaoFlutuante.BackgroundColor3=CORES.FundoMenu; botaoFlutuante.Text="K"; botaoFlutuante.TextColor3=CORES.TextoBranco
+            botaoFlutuante.Font=Enum.Font.GothamBold; botaoFlutuante.TextSize=24; aplicarCanto(botaoFlutuante,10)
             local moved = false
             botaoFlutuante.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    draggingBtn = true
-                    moved = false
-                    dragStartBtn = input.Position
-                    startPosBtn = botaoFlutuante.Position
+                    draggingBtn = true; moved = false; dragStartBtn = input.Position; startPosBtn = botaoFlutuante.Position
                 end
             end)
             UIS.InputChanged:Connect(function(input)
@@ -230,21 +212,15 @@ local ok,err=pcall(function()
             UIS.InputEnded:Connect(function(input)
                 if draggingBtn and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
                     draggingBtn = false
-                    if not moved then
-                        menu.Visible=true
-                        botaoFlutuante:Destroy()
-                        minimizado=false
-                    end
+                    if not moved then menu.Visible=true; botaoFlutuante:Destroy(); minimizado=false end
                 end
             end)
         end
     end)
 
-    -- LER DADOS REAIS DO BLOX FRUITS
     local function getData()
         local data = P:FindFirstChild("Data")
         local lvl, beli, frag, race = 0, 0, 0, "Human"
-        
         if data then
             if data:FindFirstChild("Level") then lvl = data.Level.Value end
             if data:FindFirstChild("Beli") then beli = data.Beli.Value end
@@ -263,34 +239,21 @@ local ok,err=pcall(function()
     local function hasItem(name)
         local bp=P:FindFirstChild("Backpack")
         if bp then
-            for _,v in ipairs(bp:GetChildren()) do
-                if v:IsA("Tool") and v.Name:find(name,1,true) then return true end
-            end
+            for _,v in ipairs(bp:GetChildren()) do if v:IsA("Tool") and v.Name:find(name,1,true) then return true end end
         end
         local c=P.Character
         if c then
-            for _,v in ipairs(c:GetChildren()) do
-                if v:IsA("Tool") and v.Name:find(name,1,true) then return true end
-            end
+            for _,v in ipairs(c:GetChildren()) do if v:IsA("Tool") and v.Name:find(name,1,true) then return true end end
         end
         return false
     end
 
     local function UP()
         local lvl, beli, frag, race = getData()
-        cardLvl.Text = tostring(lvl)
-        cardRace.Text = race
-        cardBeli.Text = tostring(beli)
-        cardFrag.Text = tostring(frag)
-        
+        cardLvl.Text = tostring(lvl); cardRace.Text = race; cardBeli.Text = tostring(beli); cardFrag.Text = tostring(frag)
         for i,nome in ipairs(ITENS) do
-            if hasItem(nome) then
-                itemLabels[i].Text="Owned"
-                itemLabels[i].TextColor3=CORES.TextoVerde
-            else
-                itemLabels[i].Text="Missing"
-                itemLabels[i].TextColor3=CORES.TextoMissing
-            end
+            if hasItem(nome) then itemLabels[i].Text="Owned"; itemLabels[i].TextColor3=CORES.TextoVerde
+            else itemLabels[i].Text="Missing"; itemLabels[i].TextColor3=CORES.TextoMissing end
         end
     end
 
@@ -298,17 +261,55 @@ local ok,err=pcall(function()
         statusTask.Text=text
         if status=="ok" then bolinha.BackgroundColor3=R(80,200,120)
         elseif status=="error" then bolinha.BackgroundColor3=R(255,80,80)
-        elseif status=="warn" then bolinha.BackgroundColor3=R(255,200,50)
-        end
+        elseif status=="warn" then bolinha.BackgroundColor3=R(255,200,50) end
     end
 
-    -- FUNÇÕES DE FARM
+    -- ==========================================
+    -- SISTEMA DE VOO E QUESTS
+    -- ==========================================
     local function GR() return P.Character and P.Character:FindFirstChild("HumanoidRootPart") end
     local function GH() return P.Character and P.Character:FindFirstChild("Humanoid") end
-    
-    local function TP(p)
-        local r = GR()
-        if r then r.CFrame = CFrame.new(p + Vector3.new(0,5,0)) end
+
+    -- Função de Voo (em vez de teleporte seco)
+    local function VoarPara(posicao)
+        local hrp = GR()
+        if not hrp then return end
+        local bv = Instance.new("BodyVelocity")
+        bv.Parent = hrp
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        
+        local tempo = 0
+        while tempo < 1.5 do
+            if not hrp or not hrp.Parent then break end
+            local direcao = (posicao - hrp.Position).Unit
+            bv.Velocity = direcao * 250 -- Velocidade do voo
+            task.wait(0.1)
+            tempo = tempo + 0.1
+            if (posicao - hrp.Position).Magnitude < 15 then break end
+        end
+        bv:Destroy()
+    end
+
+    local function AceitarQuest()
+        SETT("Pegando Quest...", "warn")
+        pcall(function()
+            -- Tenta se teleportar para o NPC de quest atual do jogador
+            CommF:InvokeServer("Teleport", "Quest")
+            task.wait(1)
+            -- Tenta aceitar a quest via prompt do NPC
+            local NPC = workspace:FindFirstChild("Quest")
+            if NPC and NPC:FindFirstChild("HumanoidRootPart") then
+                VoarPara(NPC.HumanoidRootPart.Position)
+                task.wait(0.5)
+                local prompt = NPC.HumanoidRootPart:FindFirstChild("ProximityPrompt")
+                if prompt then
+                    fireproximityprompt(prompt) -- Função do executor mobile/pc
+                else
+                    CommF:InvokeServer("AcceptQuest") -- Fallback
+                end
+            end
+        end)
+        task.wait(1)
     end
 
     local function findTarget()
@@ -318,7 +319,8 @@ local ok,err=pcall(function()
         for _, obj in ipairs(workspace:GetChildren()) do
             if obj:IsA("Model") then
                 local h = obj:FindFirstChild("Humanoid")
-                if h and h.Health > 0 and h.MaxHealth < 5000 and obj ~= P.Character then
+                -- Procura mobs com HP especifico para não bater em chefes
+                if h and h.Health > 0 and h.MaxHealth < 5000 and obj ~= P.Character and obj.Name ~= "Quest" then
                     local hrp = obj:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         local d = (r.Position - hrp.Position).Magnitude
@@ -332,7 +334,6 @@ local ok,err=pcall(function()
 
     local function atacar(part)
         if not part then return end
-        -- Tenta clique mobile e toque fisico
         pcall(function() if mouse1click then mouse1click() end end)
         pcall(function() if firetouchinterest then firetouchinterest(P, 0, part, 1, 0) end end)
         pcall(function() if touch then touch(part.Position) end end)
@@ -347,45 +348,41 @@ local ok,err=pcall(function()
         
         local tgt = findTarget()
         if not tgt then
-            SETT("Procurando mobs...", "warn")
-            local ang = math.random(0, 360)
-            local rad = math.rad(ang)
-            TP(r.Position + Vector3.new(math.cos(rad)*100, 0, math.sin(rad)*100))
-            task.wait(1)
+            SETT("Nenhum mob. Pegando Quest...", "warn")
+            AceitarQuest()
+            task.wait(2)
             return
         end
         
-        if (tgt.Position - r.Position).Magnitude > 30 then TP(tgt.Position) end
-        SETT("Farmando Level", "ok")
+        -- Usa o Voo em vez do Teleporte
+        if (tgt.Position - r.Position).Magnitude > 30 then 
+            SETT("Voando até o mob...", "ok")
+            VoarPara(tgt.Position) 
+        end
+        
+        SETT("Atacando Mobs...", "ok")
         
         for i = 1, 15 do
             local h2, r2 = GH(), GR()
             if not h2 or not r2 then break end
             if (h2.Health/h2.MaxHealth) < (CF.SafeHP/100) then 
-                TP(r2.Position + Vector3.new(0, 500, 0))
+                VoarPara(r2.Position + Vector3.new(0, 500, 0)) -- Foge voando pra cima
                 task.wait(3)
                 break 
             end
             
             local t2 = findTarget()
             if not t2 then break end
-            if (t2.Position - r2.Position).Magnitude > 30 then TP(t2.Position) end
+            if (t2.Position - r2.Position).Magnitude > 30 then VoarPara(t2.Position) end
             
             atacar(t2)
             task.wait(0.1)
         end
     end
 
-    local function doBounty()
-        -- Lógica simples de Bounty para o Kaitun (pega qualquer player com bounty perto)
-        SETT("Procurando Bounty...", "warn")
-        -- Se o farm de level for completado, essa função entra em ação (pode ser expandida)
-    end
-
     UP()
     SETT("Kaitun Iniciado!", "ok")
     
-    -- LOOP AUTOMÁTICO PRINCIPAL (SEMPRE ATIVO)
     task.spawn(function()
         while true do
             task.wait(1)
@@ -398,7 +395,8 @@ local ok,err=pcall(function()
                 if lvl < CF.MaxLvl then
                     doFarm()
                 else
-                    doBounty()
+                    SETT("Level Máximo! Procurando Bounty...", "ok")
+                    -- Aqui entraria o doBounty()
                 end
             end
         end
