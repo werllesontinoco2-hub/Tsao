@@ -60,7 +60,7 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -20, 0, 25)
 title.Position = UDim2.new(0, 15, 0, 5)
 title.BackgroundTransparency = 1
-title.Text = "⚡ KAITUN"
+title.Text = "KAITUN"
 title.TextColor3 = COLORS.ACCENT
 title.TextSize = 20
 title.Font = Enum.Font.GothamBold
@@ -92,7 +92,7 @@ local statusIcon = Instance.new("TextLabel")
 statusIcon.Size = UDim2.new(0, 30, 1, 0)
 statusIcon.Position = UDim2.new(0, 5, 0, 0)
 statusIcon.BackgroundTransparency = 1
-statusIcon.Text = "⏳"
+statusIcon.Text = "Time"
 statusIcon.TextSize = 22
 statusIcon.TextColor3 = COLORS.ACCENT
 statusIcon.Parent = statusFrame
@@ -403,24 +403,24 @@ end
 
 local function autoV4()
     if hasV4() then
-        setStatus("✅", "RACE V4 COMPLETA", "Já está em V4", COLORS.GREEN)
+        setStatus("correct", "RACE V4 COMPLETA", "Já está em V4", COLORS.GREEN)
         return true
     end
 
     if not hasV3() then
-        setStatus("⚠️", "V4 BLOQUEADO", "Precisa de V3 primeiro", COLORS.YELLOW)
+        setStatus("danger", "V4 BLOQUEADO", "Precisa de V3 primeiro", COLORS.YELLOW)
         log("Sem V3 — não pode fazer trial", COLORS.YELLOW)
         return false
     end
 
     local myRace = getMyRace()
-    setStatus("🔮", "RACE V4", "Verificando condições...", COLORS.PURPLE)
+    setStatus("crystal", "RACE V4", "Verificando condições...", COLORS.PURPLE)
     log("Iniciando Auto V4 — Raça: " .. myRace, COLORS.PURPLE)
 
     local eligible = countEligiblePlayers()
     if eligible < 2 then
         if Config.V4Hop then
-            setStatus("🔮", "V4: SEM ALVOS", "Hopping server (precisa 2+ raças diferentes)", COLORS.PURPLE)
+            setStatus("crystal", "V4: SEM ALVOS", "Hopping server (precisa 2+ raças diferentes)", COLORS.PURPLE)
             log("Só " .. eligible .. " raça(s) diferente(s) — hopping...", COLORS.YELLOW)
             task.wait(3)
             serverHop()
