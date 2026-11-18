@@ -47,7 +47,7 @@ local ok,err=pcall(function()
         l.Text=texto
         l.TextColor3=cor
         l.Font=neg and Enum.Font.GothamBold or Enum.Font.Gotham
-        l.TextSize=tamFonte or 12 -- Fonte padrão menor
+        l.TextSize=tamFonte or 12
         l.TextXAlignment=Enum.TextXAlignment.Left
         return l
     end
@@ -58,37 +58,47 @@ local ok,err=pcall(function()
     SG.IgnoreGuiInset=true
     SG.Parent=PG
 
-    -- MENU MENOR: 400x480
+    -- SISTEMA PARA AJUSTAR NO CELULAR (UIScale)
+    local scale = Instance.new("UIScale")
+    scale.Parent = SG
+    -- Se for celular, diminui a escala para 0.65 (ou menos). No PC fica 1.
+    if UIS.TouchEnabled and not UIS.KeyboardEnabled then
+        scale.Scale = 0.65 
+    else
+        scale.Scale = 0.9
+    end
+
+    -- MENU COMPACTO (330x420)
     local menu=Instance.new("Frame")
     menu.Name="MenuPrincipal"
     menu.Parent=SG
-    menu.Size=UDim2.new(0,400,0,480)
-    menu.Position=UDim2.new(0.5,-200,0.5,-240)
+    menu.Size=UDim2.new(0,330,0,420)
+    menu.Position=UDim2.new(0.5,-165,0.5,-210)
     menu.BackgroundColor3=CORES.FundoMenu
     menu.BorderSizePixel=0
-    aplicarCanto(menu,12)
+    aplicarCanto(menu,10)
 
     local cabecalho=Instance.new("Frame")
     cabecalho.Parent=menu
-    cabecalho.Size=UDim2.new(1,0,0,50)
+    cabecalho.Size=UDim2.new(1,0,0,45)
     cabecalho.BackgroundTransparency=1
 
     local botaoKaitun=Instance.new("TextButton")
     botaoKaitun.Parent=cabecalho
-    botaoKaitun.Size=UDim2.new(0,80,0,30)
-    botaoKaitun.Position=UDim2.new(1,-100,0,10)
+    botaoKaitun.Size=UDim2.new(0,70,0,26)
+    botaoKaitun.Position=UDim2.new(1,-90,0,10)
     botaoKaitun.BackgroundColor3=CORES.FundoBotao
     botaoKaitun.Text="Kaitun"
     botaoKaitun.TextColor3=CORES.TextoBranco
     botaoKaitun.Font=Enum.Font.GothamBold
-    botaoKaitun.TextSize=12
+    botaoKaitun.TextSize=11
     botaoKaitun.AutoButtonColor=false
     aplicarCanto(botaoKaitun,6)
 
     local botaoMin=Instance.new("TextButton")
     botaoMin.Parent=cabecalho
     botaoMin.Size=UDim2.new(0,25,0,25)
-    botaoMin.Position=UDim2.new(1,-30,0,12)
+    botaoMin.Position=UDim2.new(1,-25,0,10)
     botaoMin.BackgroundTransparency=1
     botaoMin.Text="—"
     botaoMin.TextColor3=CORES.TextoCinza
@@ -97,28 +107,27 @@ local ok,err=pcall(function()
 
     local divisor=Instance.new("Frame")
     divisor.Parent=menu
-    divisor.Size=UDim2.new(1,-30,0,1)
-    divisor.Position=UDim2.new(0,15,0,50)
+    divisor.Size=UDim2.new(1,-20,0,1)
+    divisor.Position=UDim2.new(0,10,0,45)
     divisor.BackgroundColor3=CORES.Divisor
     divisor.BorderSizePixel=0
 
-    -- STATS (Menor)
     local containerStats=Instance.new("Frame")
     containerStats.Parent=menu
-    containerStats.Size=UDim2.new(1,-30,0,140)
-    containerStats.Position=UDim2.new(0,15,0,65)
+    containerStats.Size=UDim2.new(1,-20,0,120)
+    containerStats.Position=UDim2.new(0,10,0,55)
     containerStats.BackgroundTransparency=1
 
     local function criarCard(pai,label,valor,cor,x,y)
         local card=Instance.new("Frame")
         card.Parent=pai
-        card.Size=UDim2.new(0.48,0,0,65)
+        card.Size=UDim2.new(0.48,0,0,55)
         card.Position=UDim2.new(x,0,y,0)
         card.BackgroundColor3=CORES.FundoCard
         card.BorderSizePixel=0
         aplicarCanto(card,8)
-        criarTexto(card,label,UDim2.new(1,-15,0,15),UDim2.new(0,10,0,10),CORES.TextoCinza,false,10)
-        local tv=criarTexto(card,valor,UDim2.new(1,-15,0,25),UDim2.new(0,10,0,30),cor,false,20)
+        criarTexto(card,label,UDim2.new(1,-10,0,15),UDim2.new(0,8,0,8),CORES.TextoCinza,false,9)
+        local tv=criarTexto(card,valor,UDim2.new(1,-10,0,25),UDim2.new(0,8,0,26),cor,false,18)
         return tv
     end
 
@@ -127,47 +136,44 @@ local ok,err=pcall(function()
     local cardBeli=criarCard(containerStats,"Beli","-",CORES.TextoVerde,0,0.55)
     local cardFrag=criarCard(containerStats,"Fragments","-",CORES.TextoRoxo,0.52,0.55)
 
-    -- COLLECTION (Menor)
     local containerCol=Instance.new("Frame")
     containerCol.Parent=menu
-    containerCol.Size=UDim2.new(1,-30,0,190)
-    containerCol.Position=UDim2.new(0,15,0,215)
+    containerCol.Size=UDim2.new(1,-20,0,170)
+    containerCol.Position=UDim2.new(0,10,0,185)
     containerCol.BackgroundColor3=CORES.FundoCard
     containerCol.BorderSizePixel=0
     aplicarCanto(containerCol,8)
 
-    criarTexto(containerCol,"Collection",UDim2.new(1,0,0,15),UDim2.new(0,10,0,10),CORES.TextoCinza,false,11)
+    criarTexto(containerCol,"Collection",UDim2.new(1,0,0,15),UDim2.new(0,10,0,8),CORES.TextoCinza,false,10)
 
     local ITENS={"Cursed Dual Katana","Valkyrie Helm","Skull Guitar","Mirror Fractal","Pull Lever"}
     local itemLabels={}
     for i,nome in ipairs(ITENS) do
-        local y=30+((i-1)*28)
-        criarTexto(containerCol,nome,UDim2.new(0,200,0,15),UDim2.new(0,10,0,y),CORES.TextoBranco,false,11)
-        itemLabels[i]=criarTexto(containerCol,"Missing",UDim2.new(0,70,0,15),UDim2.new(1,-80,0,y),CORES.TextoMissing,false,11)
+        local y=26+((i-1)*26)
+        criarTexto(containerCol,nome,UDim2.new(0,200,0,15),UDim2.new(0,10,0,y),CORES.TextoBranco,false,10)
+        itemLabels[i]=criarTexto(containerCol,"Missing",UDim2.new(0,60,0,15),UDim2.new(1,-70,0,y),CORES.TextoMissing,false,10)
         itemLabels[i].TextXAlignment=Enum.TextXAlignment.Right
     end
 
-    -- STATUS (Menor)
     local containerStatus=Instance.new("Frame")
     containerStatus.Parent=menu
-    containerStatus.Size=UDim2.new(1,-30,0,55)
-    containerStatus.Position=UDim2.new(0,15,0,415)
+    containerStatus.Size=UDim2.new(1,-20,0,45)
+    containerStatus.Position=UDim2.new(0,10,0,365)
     containerStatus.BackgroundColor3=CORES.FundoCard
     containerStatus.BorderSizePixel=0
     aplicarCanto(containerStatus,8)
 
     local bolinha=Instance.new("Frame")
     bolinha.Parent=containerStatus
-    bolinha.Size=UDim2.new(0,8,0,8)
-    bolinha.Position=UDim2.new(0,10,0,14)
+    bolinha.Size=UDim2.new(0,7,0,7)
+    bolinha.Position=UDim2.new(0,10,0,12)
     bolinha.BackgroundColor3=R(80,200,120)
     bolinha.BorderSizePixel=0
     aplicarCanto(bolinha,100)
 
-    criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,15),UDim2.new(0,25,0,10),CORES.TextoCinza,false,10)
-    local statusTask=criarTexto(containerStatus,"Idle",UDim2.new(1,0,0,15),UDim2.new(0,10,0,30),CORES.TextoBranco,false,12)
+    criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,12),UDim2.new(0,22,0,8),CORES.TextoCinza,false,9)
+    local statusTask=criarTexto(containerStatus,"Idle",UDim2.new(1,0,0,15),UDim2.new(0,10,0,24),CORES.TextoBranco,false,11)
 
-    -- Arrastar
     local arrastando=false
     local inicioArrasto,posInicial
     cabecalho.InputBegan:Connect(function(inp)
@@ -189,7 +195,6 @@ local ok,err=pcall(function()
         end
     end)
 
-    -- Minimizar
     local minimizado=false
     botaoMin.MouseButton1Click:Connect(function()
         if not minimizado then
@@ -198,13 +203,13 @@ local ok,err=pcall(function()
             local reabrir=Instance.new("TextButton")
             reabrir.Name="Reabrir"
             reabrir.Parent=SG
-            reabrir.Size=UDim2.new(0,80,0,30)
+            reabrir.Size=UDim2.new(0,70,0,26)
             reabrir.Position=UDim2.new(0,20,0,20)
             reabrir.BackgroundColor3=CORES.FundoMenu
             reabrir.Text="Kaitun"
             reabrir.TextColor3=CORES.TextoBranco
             reabrir.Font=Enum.Font.GothamBold
-            reabrir.TextSize=12
+            reabrir.TextSize=11
             aplicarCanto(reabrir,6)
             reabrir.MouseButton1Click:Connect(function()
                 menu.Visible=true
