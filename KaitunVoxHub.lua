@@ -58,22 +58,21 @@ local ok,err=pcall(function()
     SG.IgnoreGuiInset=true
     SG.Parent=PG
 
-    -- SISTEMA PARA AJUSTAR NO CELULAR (UIScale)
+    -- SISTEMA PARA AJUSTAR NO CELULAR
     local scale = Instance.new("UIScale")
     scale.Parent = SG
-    -- Se for celular, diminui a escala para 0.65 (ou menos). No PC fica 1.
     if UIS.TouchEnabled and not UIS.KeyboardEnabled then
-        scale.Scale = 0.65 
+        scale.Scale = 0.6 -- Reduz bastante para caber na tela do celular
     else
-        scale.Scale = 0.9
+        scale.Scale = 0.9 -- Quase tamanho normal no PC
     end
 
-    -- MENU COMPACTO (330x420)
+    -- MENU ALARGADO (400x450)
     local menu=Instance.new("Frame")
     menu.Name="MenuPrincipal"
     menu.Parent=SG
-    menu.Size=UDim2.new(0,330,0,420)
-    menu.Position=UDim2.new(0.5,-165,0.5,-210)
+    menu.Size=UDim2.new(0,400,0,450)
+    menu.Position=UDim2.new(0.5,-200,0.5,-225)
     menu.BackgroundColor3=CORES.FundoMenu
     menu.BorderSizePixel=0
     aplicarCanto(menu,10)
@@ -85,8 +84,8 @@ local ok,err=pcall(function()
 
     local botaoKaitun=Instance.new("TextButton")
     botaoKaitun.Parent=cabecalho
-    botaoKaitun.Size=UDim2.new(0,70,0,26)
-    botaoKaitun.Position=UDim2.new(1,-90,0,10)
+    botaoKaitun.Size=UDim2.new(0,80,0,28)
+    botaoKaitun.Position=UDim2.new(1,-100,0,10)
     botaoKaitun.BackgroundColor3=CORES.FundoBotao
     botaoKaitun.Text="Kaitun"
     botaoKaitun.TextColor3=CORES.TextoBranco
@@ -97,13 +96,13 @@ local ok,err=pcall(function()
 
     local botaoMin=Instance.new("TextButton")
     botaoMin.Parent=cabecalho
-    botaoMin.Size=UDim2.new(0,25,0,25)
-    botaoMin.Position=UDim2.new(1,-25,0,10)
+    botaoMin.Size=UDim2.new(0,30,0,30)
+    botaoMin.Position=UDim2.new(1,-35,0,8)
     botaoMin.BackgroundTransparency=1
     botaoMin.Text="—"
     botaoMin.TextColor3=CORES.TextoCinza
     botaoMin.Font=Enum.Font.GothamBold
-    botaoMin.TextSize=16
+    botaoMin.TextSize=18
 
     local divisor=Instance.new("Frame")
     divisor.Parent=menu
@@ -126,7 +125,7 @@ local ok,err=pcall(function()
         card.BackgroundColor3=CORES.FundoCard
         card.BorderSizePixel=0
         aplicarCanto(card,8)
-        criarTexto(card,label,UDim2.new(1,-10,0,15),UDim2.new(0,8,0,8),CORES.TextoCinza,false,9)
+        criarTexto(card,label,UDim2.new(1,-10,0,15),UDim2.new(0,8,0,8),CORES.TextoCinza,false,10)
         local tv=criarTexto(card,valor,UDim2.new(1,-10,0,25),UDim2.new(0,8,0,26),cor,false,18)
         return tv
     end
@@ -138,7 +137,7 @@ local ok,err=pcall(function()
 
     local containerCol=Instance.new("Frame")
     containerCol.Parent=menu
-    containerCol.Size=UDim2.new(1,-20,0,170)
+    containerCol.Size=UDim2.new(1,-20,0,195)
     containerCol.Position=UDim2.new(0,10,0,185)
     containerCol.BackgroundColor3=CORES.FundoCard
     containerCol.BorderSizePixel=0
@@ -149,16 +148,16 @@ local ok,err=pcall(function()
     local ITENS={"Cursed Dual Katana","Valkyrie Helm","Skull Guitar","Mirror Fractal","Pull Lever"}
     local itemLabels={}
     for i,nome in ipairs(ITENS) do
-        local y=26+((i-1)*26)
-        criarTexto(containerCol,nome,UDim2.new(0,200,0,15),UDim2.new(0,10,0,y),CORES.TextoBranco,false,10)
-        itemLabels[i]=criarTexto(containerCol,"Missing",UDim2.new(0,60,0,15),UDim2.new(1,-70,0,y),CORES.TextoMissing,false,10)
+        local y=28+((i-1)*30)
+        criarTexto(containerCol,nome,UDim2.new(0,200,0,15),UDim2.new(0,10,0,y),CORES.TextoBranco,false,11)
+        itemLabels[i]=criarTexto(containerCol,"Missing",UDim2.new(0,60,0,15),UDim2.new(1,-70,0,y),CORES.TextoMissing,false,11)
         itemLabels[i].TextXAlignment=Enum.TextXAlignment.Right
     end
 
     local containerStatus=Instance.new("Frame")
     containerStatus.Parent=menu
     containerStatus.Size=UDim2.new(1,-20,0,45)
-    containerStatus.Position=UDim2.new(0,10,0,365)
+    containerStatus.Position=UDim2.new(0,10,0,395)
     containerStatus.BackgroundColor3=CORES.FundoCard
     containerStatus.BorderSizePixel=0
     aplicarCanto(containerStatus,8)
@@ -174,15 +173,19 @@ local ok,err=pcall(function()
     criarTexto(containerStatus,"Current Task",UDim2.new(1,0,0,12),UDim2.new(0,22,0,8),CORES.TextoCinza,false,9)
     local statusTask=criarTexto(containerStatus,"Idle",UDim2.new(1,0,0,15),UDim2.new(0,10,0,24),CORES.TextoBranco,false,11)
 
+    -- Arrastar Menu Inteiro (Clicando em qualquer parte do fundo)
     local arrastando=false
     local inicioArrasto,posInicial
-    cabecalho.InputBegan:Connect(function(inp)
+    local function iniciarArrasto(inp)
         if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then
             arrastando=true
             inicioArrasto=inp.Position
             posInicial=menu.Position
         end
-    end)
+    end
+    menu.InputBegan:Connect(iniciarArrasto)
+    cabecalho.InputBegan:Connect(iniciarArrasto)
+
     UIS.InputChanged:Connect(function(inp)
         if arrastando and(inp.UserInputType==Enum.UserInputType.MouseMovement or inp.UserInputType==Enum.UserInputType.Touch) then
             local d=inp.Position-inicioArrasto
@@ -195,30 +198,63 @@ local ok,err=pcall(function()
         end
     end)
 
+    -- Minimizar e Botão Flutuante Arrastável
     local minimizado=false
+    local botaoFlutuante
+    local arrastandoBtn=false
+    local inicioBtn,posInicialBtn
+
     botaoMin.MouseButton1Click:Connect(function()
         if not minimizado then
             minimizado=true
             menu.Visible=false
-            local reabrir=Instance.new("TextButton")
-            reabrir.Name="Reabrir"
-            reabrir.Parent=SG
-            reabrir.Size=UDim2.new(0,70,0,26)
-            reabrir.Position=UDim2.new(0,20,0,20)
-            reabrir.BackgroundColor3=CORES.FundoMenu
-            reabrir.Text="Kaitun"
-            reabrir.TextColor3=CORES.TextoBranco
-            reabrir.Font=Enum.Font.GothamBold
-            reabrir.TextSize=11
-            aplicarCanto(reabrir,6)
-            reabrir.MouseButton1Click:Connect(function()
-                menu.Visible=true
-                reabrir:Destroy()
-                minimizado=false
+            
+            -- Cria o botão quadrado flutuante
+            botaoFlutuante=Instance.new("TextButton")
+            botaoFlutuante.Name="BotaoFlutuante"
+            botaoFlutuante.Parent=SG
+            botaoFlutuante.Size=UDim2.new(0,50,0,50)
+            botaoFlutuante.Position=UDim2.new(0,20,0,20)
+            botaoFlutuante.BackgroundColor3=CORES.FundoMenu
+            botaoFlutuante.Text="K"
+            botaoFlutuante.TextColor3=CORES.TextoBranco
+            botaoFlutuante.Font=Enum.Font.GothamBold
+            botaoFlutuante.TextSize=20
+            aplicarCanto(botaoFlutuante,10)
+            
+            -- Arrastar o botão flutuante
+            botaoFlutuante.InputBegan:Connect(function(inp)
+                if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then
+                    arrastandoBtn=true
+                    inicioBtn=inp.Position
+                    posInicialBtn=botaoFlutuante.Position
+                end
+            end)
+            
+            -- Clique para reabrir
+            botaoFlutuante.MouseButton1Click:Connect(function()
+                if not arrastandoBtn then
+                    menu.Visible=true
+                    botaoFlutuante:Destroy()
+                    minimizado=false
+                end
             end)
         end
     end)
 
+    UIS.InputChanged:Connect(function(inp)
+        if arrastandoBtn and(inp.UserInputType==Enum.UserInputType.MouseMovement or inp.UserInputType==Enum.UserInputType.Touch) then
+            local d=inp.Position-inicioBtn
+            botaoFlutuante.Position=UDim2.new(posInicialBtn.X.Scale,posInicialBtn.X.Offset+d.X,posInicialBtn.Y.Scale,posInicialBtn.Y.Offset+d.Y)
+        end
+    end)
+    UIS.InputEnded:Connect(function(inp)
+        if inp.UserInputType==Enum.UserInputType.MouseButton1 or inp.UserInputType==Enum.UserInputType.Touch then
+            arrastandoBtn=false
+        end
+    end)
+
+    -- Funções de dados
     function GL()
         local ls=P:FindFirstChild("leaderstats")
         if not ls then return 0 end
@@ -330,26 +366,17 @@ local ok,err=pcall(function()
         if not r then return nil end
         local best=nil
         local bestD=CF.FarmDist
-        local enemies=workspace:FindFirstChild("Enemies")
-        local mobs=workspace:FindFirstChild("Mobs")
-        local map=workspace:FindFirstChild("Map")
-        local folders={}
-        if enemies then folders[#folders+1]=enemies end
-        if mobs then folders[#folders+1]=mobs end
-        if map then folders[#folders+1]=map end
-        if #folders==0 then folders={workspace} end
-        for _,folder in ipairs(folders) do
-            for _,obj in ipairs(folder:GetChildren()) do
-                if obj:IsA("Model") then
-                    local h=obj:FindFirstChild("Humanoid")
-                    if h and h.Health>0 and h.MaxHealth<5000 then
-                        local hrp=obj:FindFirstChild("HumanoidRootPart")
-                        if hrp then
-                            local d=(r.Position-hrp.Position).Magnitude
-                            if d<bestD then
-                                bestD=d
-                                best=hrp
-                            end
+        -- Procura em TUDO no workspace que tenha Humanoid
+        for _,obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and obj ~= P.Character then
+                local h=obj:FindFirstChild("Humanoid")
+                if h and h.Health>0 and h.MaxHealth<5000 and h.MaxHealth>10 then
+                    local hrp=obj:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        local d=(r.Position-hrp.Position).Magnitude
+                        if d<bestD then
+                            bestD=d
+                            best=hrp
                         end
                     end
                 end
@@ -359,39 +386,32 @@ local ok,err=pcall(function()
     end
 
     function meleeHit(part)
+        if not part then return end
+        -- Tenta usar clique simulado (funciona em celular e PC)
         local ok2=pcall(function()
-            firetouchinterest(P,0,part,1,0)
+            if mouse1click then mouse1click() end
         end)
-        if ok2 then return true end
+        if not ok2 then
+            -- Fallback para firetouchinterest (executores PC)
+            pcall(function()
+                firetouchinterest(P,0,part,1,0)
+            end)
+        end
+        -- Tenta usar a tecla Z (fallback final)
         UIS:SendKeyEvent(true,Enum.KeyCode.Z,false,game)
         task.wait(0.05)
         UIS:SendKeyEvent(false,Enum.KeyCode.Z,false,game)
-        return false
     end
 
     function skillHit()
-        UIS:SendKeyEvent(true,Enum.KeyCode.Z,false,game)
-        task.wait(0.05)
-        UIS:SendKeyEvent(false,Enum.KeyCode.Z,false,game)
-        task.wait(0.1)
-        UIS:SendKeyEvent(true,Enum.KeyCode.X,false,game)
-        task.wait(0.05)
-        UIS:SendKeyEvent(false,Enum.KeyCode.X,false,game)
-        task.wait(0.1)
-        UIS:SendKeyEvent(true,Enum.KeyCode.C,false,game)
-        task.wait(0.05)
-        UIS:SendKeyEvent(false,Enum.KeyCode.C,false,game)
-        task.wait(0.1)
-        local fr=getFruit()
-        if fr~="None" and fr~="" then
-            UIS:SendKeyEvent(true,Enum.KeyCode.V,false,game)
-            task.wait(0.05)
-            UIS:SendKeyEvent(false,Enum.KeyCode.V,false,game)
-            task.wait(0.15)
-            UIS:SendKeyEvent(true,Enum.KeyCode.F,false,game)
-            task.wait(0.05)
-            UIS:SendKeyEvent(false,Enum.KeyCode.F,false,game)
-            task.wait(0.15)
+        -- Simula toques no celular e teclas no PC
+        if UIS.TouchEnabled then
+            if mouse1click then mouse1click() end
+            task.wait(0.1)
+        else
+            UIS:SendKeyEvent(true,Enum.KeyCode.Z,false,game) task.wait(0.05) UIS:SendKeyEvent(false,Enum.KeyCode.Z,false,game) task.wait(0.1)
+            UIS:SendKeyEvent(true,Enum.KeyCode.X,false,game) task.wait(0.05) UIS:SendKeyEvent(false,Enum.KeyCode.X,false,game) task.wait(0.1)
+            UIS:SendKeyEvent(true,Enum.KeyCode.C,false,game) task.wait(0.05) UIS:SendKeyEvent(false,Enum.KeyCode.C,false,game) task.wait(0.1)
         end
     end
 
@@ -432,7 +452,7 @@ local ok,err=pcall(function()
             if(t2.Position-r2.Position).Magnitude>60 then TP(t2.Position) end
             meleeHit(t2)
             if i%5==0 then skillHit() end
-            task.wait(0.05)
+            task.wait(0.1) -- Delay maior para o celular processar
         end
     end
 
@@ -497,11 +517,11 @@ local ok,err=pcall(function()
             if not th or th.Health<=0 then break end
             local r2=GR()
             if not r2 then return end
-            local tr2=tc2:FindFirstChild("HumanoidRootPart")
+     local tr2=tc2:FindFirstChild("HumanoidRootPart")
             if tr2 and(r2.Position-tr2.Position).Magnitude>60 then TP(tr2.Position) end
             meleeHit(tr2)
             if i%5==0 then skillHit() end
-            task.wait(0.05)
+            task.wait(0.1)
         end
         local tc3=tgt.Character
         if not tc3 or not tc3:FindFirstChild("Humanoid") then
@@ -602,6 +622,7 @@ local ok,err=pcall(function()
     task.wait(2)
     SETT("Ready. Farming.",CORES.TextoVerde,"ok")
 
+    -- Loop Principal rodando em thread separada para não travar o menu
     task.spawn(function()
         while true do
             task.wait(1)
