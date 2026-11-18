@@ -1,553 +1,382 @@
+local ok, err = pcall(function()
+
 local Config = {
     MaxLevel = 2800,
     TargetBounty = 10000000,
-    Team = "Pirates",
     SafeHealth = 20,
-    Race = "Mink",
     SkipFruits = {"Buddha", "T-Rex", "Leopard", "Dough"},
     AutoV4 = true,
-    V4Hop = true,
 }
 
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
-local UserInputService = game:GetService("UserInputService")
-local TeleportService = game:GetService("TeleportService")
+local UIS = game:GetService("UserInputService")
+local TS = game:GetService("TeleportService")
 
-local COLORS = {
-    BG        = Color3.fromRGB(15, 15, 25),
-    BG_LIGHT  = Color3.fromRGB(25, 25, 40),
-    ACCENT    = Color3.fromRGB(100, 200, 255),
-    GREEN     = Color3.fromRGB(0, 230, 120),
-    RED       = Color3.fromRGB(255, 80, 80),
-    YELLOW    = Color3.fromRGB(255, 200, 50),
-    PURPLE    = Color3.fromRGB(180, 100, 255),
-    CYAN      = Color3.fromRGB(0, 240, 240),
-    TEXT      = Color3.fromRGB(220, 220, 240),
-    TEXT_DIM  = Color3.fromRGB(120, 120, 150),
-    GRAD_TOP  = Color3.fromRGB(30, 30, 60),
-    GRAD_BOT  = Color3.fromRGB(10, 10, 20),
+local C = {
+    BG = Color3.fromRGB(15, 15, 25),
+    BG2 = Color3.fromRGB(25, 25, 40),
+    ACC = Color3.fromRGB(100, 200, 255),
+    GRN = Color3.fromRGB(0, 230, 120),
+    RED = Color3.fromRGB(255, 80, 80),
+    YEL = Color3.fromRGB(255, 200, 50),
+    PUR = Color3.fromRGB(180, 100, 255),
+    CYN = Color3.fromRGB(0, 240, 240),
+    TXT = Color3.fromRGB(220, 220, 240),
+    DIM = Color3.fromRGB(120, 120, 150),
 }
 
 local main = Instance.new("Frame")
 main.Name = "KaitunGUI"
-main.Size = UDim2.new(0, 320, 0, 420)
+main.Size = UDim2.new(0, 300, 0, 380)
 main.Position = UDim2.new(0, 20, 0, 40)
-main.BackgroundColor3 = COLORS.BG
+main.BackgroundColor3 = C.BG
 main.BackgroundTransparency = 0.1
 main.Parent = playerGui
 
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 14)
-mainCorner.Parent = main
+local mc = Instance.new("UICorner")
+mc.CornerRadius = UDim.new(0, 14)
+mc.Parent = main
 
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = Color3.fromRGB(60, 60, 100)
-mainStroke.Thickness = 1.5
-mainStroke.Parent = main
+local hdr = Instance.new("TextLabel")
+hdr.Size = UDim2.new(1, 0, 0, 40)
+hdr.BackgroundColor3 = C.BG2
+hdr.BackgroundTransparency = 0.3
+hdr.Text = "KAITUN"
+hdr.TextColor3 = C.ACC
+hdr.TextSize = 20
+hdr.Font = Enum.Font.GothamBold
+hdr.Parent = main
 
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 50)
-header.BackgroundColor3 = COLORS.GRAD_TOP
-header.BackgroundTransparency = 0.2
-header.Parent = main
+local st = Instance.new("TextLabel")
+st.Size = UDim2.new(1, -20, 0, 20)
+st.Position = UDim2.new(0, 10, 0, 50)
+st.BackgroundTransparency = 1
+st.Text = "Starting..."
+st.TextColor3 = C.TXT
+st.TextSize = 14
+st.Font = Enum.Font.GothamBold
+st.TextXAlignment = Enum.TextXAlignment.Left
+st.Parent = main
 
-local headerCornerTop = Instance.new("UICorner")
-headerCornerTop.CornerRadius = UDim.new(0, 14)
-headerCornerTop.Parent = header
+local sd = Instance.new("TextLabel")
+sd.Size = UDim2.new(1, -20, 0, 16)
+sd.Position = UDim2.new(0, 10, 0, 72)
+sd.BackgroundTransparency = 1
+sd.Text = "Loading..."
+sd.TextColor3 = C.DIM
+sd.TextSize = 11
+sd.Font = Enum.Font.Gotham
+sd.TextXAlignment = Enum.TextXAlignment.Left
+st.Parent = main
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -20, 0, 25)
-title.Position = UDim2.new(0, 15, 0, 5)
-title.BackgroundTransparency = 1
-title.Text = "KAITUN"
-title.TextColor3 = COLORS.ACCENT
-title.TextSize = 20
-title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = header
+local pbg = Instance.new("Frame")
+pbg.Size = UDim2.new(1, -20, 0, 6)
+pbg.Position = UDim2.new(0, 10, 0, 95)
+pbg.BackgroundColor3 = C.BG2
+pbg.Parent = main
+local pc = Instance.new("UICorner")
+pc.CornerRadius = UDim.new(1, 0)
+pc.Parent = pbg
+local pbar = Instance.new("Frame")
+pbar.Size = UDim2.new(0, 0, 1, 0)
+pbar.BackgroundColor3 = C.GRN
+pbar.BorderSizePixel = 0
+pbar.Parent = pbg
+local pbc = Instance.new("UICorner")
+pbc.CornerRadius = UDim.new(1, 0)
+pbc.Parent = pbar
 
-local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(1, -20, 0, 18)
-subtitle.Position = UDim2.new(0, 15, 0, 28)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "Full Auto Progression"
-subtitle.TextColor3 = COLORS.TEXT_DIM
-subtitle.TextSize = 12
-subtitle.Font = Enum.Font.Gotham
-subtitle.TextXAlignment = Enum.TextXAlignment.Left
-subtitle.Parent = header
+local s1 = Instance.new("TextLabel")
+s1.Size = UDim2.new(0, 130, 0, 16)
+s1.Position = UDim2.new(0, 10, 0, 110)
+s1.BackgroundTransparency = 1
+s1.Text = "Level: -"
+s1.TextColor3 = C.YEL
+s1.TextSize = 12
+s1.Font = Enum.Font.GothamBold
+s1.TextXAlignment = Enum.TextXAlignment.Left
+s1.Parent = main
 
-local statusFrame = Instance.new("Frame")
-statusFrame.Size = UDim2.new(1, -20, 0, 45)
-statusFrame.Position = UDim2.new(0, 10, 0, 60)
-statusFrame.BackgroundColor3 = COLORS.BG_LIGHT
-statusFrame.Parent = main
+local s2 = Instance.new("TextLabel")
+s2.Size = UDim2.new(0, 130, 0, 16)
+s2.Position = UDim2.new(0, 10, 0, 130)
+s2.BackgroundTransparency = 1
+s2.Text = "Bounty: -"
+s2.TextColor3 = C.RED
+s2.TextSize = 12
+s2.Font = Enum.Font.GothamBold
+s2.TextXAlignment = Enum.TextXAlignment.Left
+s2.Parent = main
 
-local statusCorner = Instance.new("UICorner")
-statusCorner.CornerRadius = UDim.new(0, 10)
-statusCorner.Parent = statusFrame
+local s3 = Instance.new("TextLabel")
+s3.Size = UDim2.new(0, 130, 0, 16)
+s3.Position = UDim2.new(0, 10, 0, 150)
+s3.BackgroundTransparency = 1
+s3.Text = "Race: -"
+s3.TextColor3 = C.PUR
+s3.TextSize = 12
+s3.Font = Enum.Font.GothamBold
+s3.TextXAlignment = Enum.TextXAlignment.Left
+s3.Parent = main
 
-local statusIcon = Instance.new("TextLabel")
-statusIcon.Size = UDim2.new(0, 30, 1, 0)
-statusIcon.Position = UDim2.new(0, 5, 0, 0)
-statusIcon.BackgroundTransparency = 1
-statusIcon.Text = "..."
-statusIcon.TextSize = 22
-statusIcon.TextColor3 = COLORS.ACCENT
-statusIcon.Parent = statusFrame
+local s4 = Instance.new("TextLabel")
+s4.Size = UDim2.new(0, 130, 0, 16)
+s4.Position = UDim2.new(0, 10, 0, 170)
+s4.BackgroundTransparency = 1
+s4.Text = "Fruit: -"
+s4.TextColor3 = C.CYN
+s4.TextSize = 12
+s4.Font = Enum.Font.GothamBold
+s4.TextXAlignment = Enum.TextXAlignment.Left
+s4.Parent = main
 
-local statusText = Instance.new("TextLabel")
-statusText.Size = UDim2.new(1, -45, 0, 20)
-statusText.Position = UDim2.new(0, 35, 0, 5)
-statusText.BackgroundTransparency = 1
-statusText.Text = "Starting..."
-statusText.TextColor3 = COLORS.TEXT
-statusText.TextSize = 14
-statusText.Font = Enum.Font.GothamBold
-statusText.TextXAlignment = Enum.TextXAlignment.Left
-statusText.Parent = statusFrame
+local lg = Instance.new("Frame")
+lg.Size = UDim2.new(1, -20, 0, 180)
+lg.Position = UDim2.new(0, 10, 0, 195)
+lg.BackgroundColor3 = C.BG2
+lg.BackgroundTransparency = 0.5
+lg.Parent = main
+local lc = Instance.new("UICorner")
+lc.CornerRadius = UDim.new(0, 8)
+lc.Parent = lg
 
-local statusDetail = Instance.new("TextLabel")
-statusDetail.Size = UDim2.new(1, -45, 0, 16)
-statusDetail.Position = UDim2.new(0, 35, 0, 26)
-statusDetail.BackgroundTransparency = 1
-statusDetail.Text = "Loading..."
-statusDetail.TextColor3 = COLORS.TEXT_DIM
-statusDetail.TextSize = 11
-statusDetail.Font = Enum.Font.Gotham
-statusDetail.TextXAlignment = Enum.TextXAlignment.Left
-statusDetail.Parent = statusFrame
+local lsc = Instance.new("ScrollingFrame")
+lsc.Size = UDim2.new(1, -8, 1, -8)
+lsc.Position = UDim2.new(0, 4, 0, 4)
+lsc.BackgroundTransparency = 1
+lsc.BorderSizePixel = 0
+lsc.ScrollBarThickness = 3
+lsc.AutomaticCanvasSize = Enum.AutomaticSize.Y
+lsc.Parent = lg
 
-local progressBg = Instance.new("Frame")
-progressBg.Size = UDim2.new(1, -20, 0, 8)
-progressBg.Position = UDim2.new(0, 10, 0, 115)
-progressBg.BackgroundColor3 = COLORS.BG_LIGHT
-progressBg.Parent = main
-
-local progressCorner = Instance.new("UICorner")
-progressCorner.CornerRadius = UDim.new(1, 0)
-progressCorner.Parent = progressBg
-
-local progressBar = Instance.new("Frame")
-progressBar.Size = UDim2.new(0, 0, 1, 0)
-progressBar.BackgroundColor3 = COLORS.GREEN
-progressBar.BorderSizePixel = 0
-progressBar.Parent = progressBg
-
-local progressCornerBar = Instance.new("UICorner")
-progressCornerBar.CornerRadius = UDim.new(1, 0)
-progressCornerBar.Parent = progressBar
-
-local statsFrame = Instance.new("Frame")
-statsFrame.Size = UDim2.new(1, -20, 0, 55)
-statsFrame.Position = UDim2.new(0, 10, 0, 130)
-statsFrame.BackgroundColor3 = COLORS.BG_LIGHT
-statsFrame.Parent = main
-
-local statsCorner = Instance.new("UICorner")
-statsCorner.CornerRadius = UDim.new(0, 10)
-statsCorner.Parent = statsFrame
-
-local levelLabel = Instance.new("TextLabel")
-levelLabel.Size = UDim2.new(0, 90, 1, 0)
-levelLabel.Position = UDim2.new(0, 10, 0, 8)
-levelLabel.BackgroundTransparency = 1
-levelLabel.Text = "Level: -"
-levelLabel.TextColor3 = COLORS.YELLOW
-levelLabel.TextSize = 13
-levelLabel.Font = Enum.Font.GothamBold
-levelLabel.Parent = statsFrame
-
-local bountyLabel = Instance.new("TextLabel")
-bountyLabel.Size = UDim2.new(0, 110, 1, 0)
-bountyLabel.Position = UDim2.new(0, 10, 0, 30)
-bountyLabel.BackgroundTransparency = 1
-bountyLabel.Text = "Bounty: -"
-bountyLabel.TextColor3 = COLORS.RED
-bountyLabel.TextSize = 13
-bountyLabel.Font = Enum.Font.GothamBold
-bountyLabel.Parent = statsFrame
-
-local raceLabel = Instance.new("TextLabel")
-raceLabel.Size = UDim2.new(0, 100, 1, 0)
-raceLabel.Position = UDim2.new(1, -110, 0, 8)
-raceLabel.BackgroundTransparency = 1
-raceLabel.Text = "Race: -"
-raceLabel.TextColor3 = COLORS.PURPLE
-raceLabel.TextSize = 13
-raceLabel.Font = Enum.Font.GothamBold
-raceLabel.TextXAlignment = Enum.TextXAlignment.Right
-raceLabel.Parent = statsFrame
-
-local fruitLabel = Instance.new("TextLabel")
-fruitLabel.Size = UDim2.new(0, 100, 1, 0)
-fruitLabel.Position = UDim2.new(1, -110, 0, 30)
-fruitLabel.BackgroundTransparency = 1
-fruitLabel.Text = "Fruit: -"
-fruitLabel.TextColor3 = COLORS.CYAN
-fruitLabel.TextSize = 13
-fruitLabel.Font = Enum.Font.GothamBold
-fruitLabel.TextXAlignment = Enum.TextXAlignment.Right
-fruitLabel.Parent = statsFrame
-
-local logFrame = Instance.new("Frame")
-logFrame.Size = UDim2.new(1, -20, 1, -220)
-logFrame.Position = UDim2.new(0, 10, 0, 195)
-logFrame.BackgroundColor3 = COLORS.GRAD_BOT
-logFrame.BackgroundTransparency = 0.3
-logFrame.Parent = main
-
-local logCorner = Instance.new("UICorner")
-logCorner.CornerRadius = UDim.new(0, 10)
-logCorner.Parent = logFrame
-
-local logScroller = Instance.new("ScrollingFrame")
-logScroller.Size = UDim2.new(1, -10, 1, -10)
-logScroller.Position = UDim2.new(0, 5, 0, 5)
-logScroller.BackgroundTransparency = 1
-logScroller.BorderSizePixel = 0
-logScroller.ScrollBarThickness = 3
-logScroller.ScrollBarImageColor3 = COLORS.ACCENT
-logScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
-logScroller.AutomaticCanvasSize = Enum.AutomaticSize.Y
-logScroller.Parent = logFrame
-
-local dragging = false
-local dragStart, dragPos
-main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        dragPos = main.Position
-    end
-end)
-main.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        main.Position = UDim2.new(dragPos.X.Scale, dragPos.X.Offset + delta.X, dragPos.Y.Scale, dragPos.Y.Offset + delta.Y)
-    end
-end)
-
-local logCount = 0
-
-local function log(msg, color)
-    logCount += 1
-    local entry = Instance.new("TextLabel")
-    entry.Size = UDim2.new(1, 0, 0, 16)
-    entry.Position = UDim2.new(0, 0, 0, (logCount - 1) * 17)
-    entry.BackgroundTransparency = 1
-    entry.Text = "[Kaitun] " .. msg
-    entry.TextColor3 = color or COLORS.TEXT
-    entry.TextSize = 11
-    entry.Font = Enum.Font.Gotham
-    entry.TextXAlignment = Enum.TextXAlignment.Left
-    entry.TextTruncate = Enum.TextTruncate.AtEnd
-    entry.Parent = logScroller
-    logScroller.CanvasPosition = Vector2.new(0, logScroller.CanvasSize.Y.Offset)
+local lcount = 0
+local function addLog(msg, col)
+    lcount = lcount + 1
+    local e = Instance.new("TextLabel")
+    e.Size = UDim2.new(1, 0, 0, 16)
+    e.Position = UDim2.new(0, 0, 0, (lcount - 1) * 17)
+    e.BackgroundTransparency = 1
+    e.Text = msg
+    e.TextColor3 = col or C.TXT
+    e.TextSize = 10
+    e.Font = Enum.Font.Gotham
+    e.TextXAlignment = Enum.TextXAlignment.Left
+    e.TextTruncate = Enum.TextTruncate.AtEnd
+    e.Parent = lsc
+    lsc.CanvasPosition = Vector2.new(0, lsc.CanvasSize.Y.Offset)
 end
 
-local function setStatus(icon, text, detail, color)
-    statusIcon.Text = icon
-    statusIcon.TextColor3 = color or COLORS.ACCENT
-    statusText.Text = text
-    statusText.TextColor3 = color or COLORS.TEXT
-    if detail then
-        statusDetail.Text = detail
-    end
+local function setSt(text, detail, col)
+    st.Text = text
+    st.TextColor3 = col or C.TXT
+    if detail then sd.Text = detail end
 end
 
-local function setProgress(pct)
-    progressBar.Size = UDim2.new(math.clamp(pct, 0, 1), 0, 1, 0)
-    if pct < 0.3 then
-        progressBar.BackgroundColor3 = COLORS.RED
-    elseif pct < 0.7 then
-        progressBar.BackgroundColor3 = COLORS.YELLOW
-    else
-        progressBar.BackgroundColor3 = COLORS.GREEN
-    end
+local function setBar(pct)
+    pbar.Size = UDim2.new(math.clamp(pct, 0, 1), 0, 1, 0)
+    if pct < 0.3 then pbar.BackgroundColor3 = C.RED
+    elseif pct < 0.7 then pbar.BackgroundColor3 = C.YEL
+    else pbar.BackgroundColor3 = C.GRN end
 end
 
-local function updateStats()
-    local ls = player:FindFirstChild("leaderstats")
-    if not ls then return end
-    local lvl = ls:FindFirstChild("Level") or ls:FindFirstChild("Lvl")
-    local bty = ls:FindFirstChild("Bounty") or ls:FindFirstChild("Honor")
-    levelLabel.Text = "Level: " .. (lvl and lvl.Value or "?")
-    bountyLabel.Text = "Bounty: " .. (bty and tostring(bty.Value) or "0")
-    local fruit = player:FindFirstChild("Blox Fruit")
-    fruitLabel.Text = "Fruit: " .. (fruit and fruit.Value or "None")
-    local race = player:FindFirstChild("Race")
-    raceLabel.Text = "Race: " .. (race and race.Value or "?")
-    if lvl then
-        setProgress(lvl.Value / Config.MaxLevel)
-    end
-end
-
-local function getLevel()
+local function getLvl()
     local ls = player:FindFirstChild("leaderstats")
     if not ls then return 0 end
-    local lvl = ls:FindFirstChild("Level") or ls:FindFirstChild("Lvl")
-    return lvl and lvl.Value or 0
+    local l = ls:FindFirstChild("Level") or ls:FindFirstChild("Lvl")
+    return l and l.Value or 0
 end
 
-local function getBounty()
+local function getBty()
     local ls = player:FindFirstChild("leaderstats")
     if not ls then return 0 end
     local b = ls:FindFirstChild("Bounty") or ls:FindFirstChild("Honor")
     return b and b.Value or 0
 end
 
-local function getCharacter()
+local function getRoot()
     local c = player.Character
-    if not c then return nil, nil, nil end
-    return c, c:FindFirstChild("Humanoid"), c:FindFirstChild("HumanoidRootPart")
+    if not c then return nil end
+    return c:FindFirstChild("HumanoidRootPart")
 end
 
-local function teleport(pos)
-    local _, _, root = getCharacter()
-    if root then
-        root.CFrame = CFrame.new(pos + Vector3.new(0, 5, 0))
-    end
+local function getHum()
+    local c = player.Character
+    if not c then return nil end
+    return c:FindFirstChild("Humanoid")
 end
 
-local function hasQuest()
-    local quest = player:FindFirstChild("Quest")
-    if not quest then return false end
-    return quest:FindFirstChild("Active") ~= nil
+local function tp(pos)
+    local r = getRoot()
+    if r then r.CFrame = CFrame.new(pos + Vector3.new(0, 5, 0)) end
 end
 
-local function needFruit()
-    local fruit = player:FindFirstChild("Blox Fruit")
-    if fruit and fruit.Value and fruit.Value ~= "" then return false end
-    return getLevel() >= 10
-end
-
-local function getMyRace()
-    local race = player:FindFirstChild("Race")
-    return race and race.Value or "Human"
+local function upStats()
+    local l = getLvl()
+    local b = getBty()
+    s1.Text = "Level: " .. l
+    s2.Text = "Bounty: " .. b
+    local fr = player:FindFirstChild("Blox Fruit")
+    s4.Text = "Fruit: " .. (fr and fr.Value or "None")
+    local rc = player:FindFirstChild("Race")
+    s3.Text = "Race: " .. (rc and rc.Value or "?")
+    setBar(l / Config.MaxLevel)
 end
 
 local function hasV3()
-    local stage = player:FindFirstChild("RaceStage") or player:FindFirstChild("Race_V")
-    if stage and stage.Value >= 3 then return true end
-    local abilities = player:FindFirstChild("Abilities")
-    if abilities then
-        for _, a in ipairs(abilities:GetChildren()) do
-            if a.Name:find("V3") or a.Name:find("Awaken") then
-                return true
-            end
-        end
-    end
+    local st2 = player:FindFirstChild("RaceStage") or player:FindFirstChild("Race_V")
+    if st2 and st2.Value >= 3 then return true end
     return false
 end
 
 local function hasV4()
-    local stage = player:FindFirstChild("RaceStage") or player:FindFirstChild("Race_V")
-    if stage and stage.Value >= 4 then return true end
-    local abilities = player:FindFirstChild("Abilities")
-    if abilities then
-        for _, a in ipairs(abilities:GetChildren()) do
-            if a.Name:find("V4") or a.Name:find("Awakening") then
-                return true
-            end
-        end
-    end
+    local st2 = player:FindFirstChild("RaceStage") or player:FindFirstChild("Race_V")
+    if st2 and st2.Value >= 4 then return true end
     return false
 end
 
-local function activateRaceAbility()
-    UserInputService:SendKeyEvent(true, Enum.KeyCode.Y, false, game)
-    task.wait(0.1)
-    UserInputService:SendKeyEvent(false, Enum.KeyCode.Y, false, game)
-    task.wait(0.5)
-end
-
-local function countEligiblePlayers()
-    local myRace = getMyRace()
-    local count = 0
-    local races = {}
+local function countRaces()
+    local my = player:FindFirstChild("Race")
+    local myR = my and my.Value or "Human"
+    local seen = {}
+    local n = 0
     for _, p in ipairs(game.Players:GetPlayers()) do
         if p ~= player then
-            local race = p:FindFirstChild("Race")
-            local r = race and race.Value or "Human"
-            if r ~= myRace and not races[r] then
-                races[r] = true
-                count += 1
+            local r = p:FindFirstChild("Race")
+            local rv = r and r.Value or "Human"
+            if rv ~= myR and not seen[rv] then
+                seen[rv] = true
+                n = n + 1
             end
         end
     end
-    return count
+    return n
 end
 
 local function isFullMoon()
     local rs = game:GetService("ReplicatedStorage")
     local moon = rs:FindFirstChild("MoonPhase") or rs:FindFirstChild("Moon")
     if moon then
-        local phase = moon:FindFirstChild("Phase")
-        if phase and phase.Value then
-            return phase.Value:lower():find("full") ~= nil
+        local ph = moon:FindFirstChild("Phase")
+        if ph and ph.Value then
+            return ph.Value:lower():find("full") ~= nil
         end
     end
     return false
 end
 
-local function serverHop()
-    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, {})
+local function hop()
+    TS:TeleportToPlaceInstance(game.PlaceId, game.JobId, {})
 end
 
-local function autoV4()
+local function doV4()
     if hasV4() then
-        setStatus("V4", "RACE V4 COMPLETE", "Already V4", COLORS.GREEN)
+        setSt("V4 COMPLETE", "Already V4", C.GRN)
         return true
     end
-
     if not hasV3() then
-        setStatus("!", "V4 LOCKED", "Need V3 first", COLORS.YELLOW)
-        log("No V3 - cannot do trial", COLORS.YELLOW)
+        setSt("V4 LOCKED", "Need V3 first", C.YEL)
+        addLog("No V3 yet", C.YEL)
         return false
     end
 
-    local myRace = getMyRace()
-    setStatus("V4", "RACE V4", "Checking conditions...", COLORS.PURPLE)
-    log("Auto V4 started - Race: " .. myRace, COLORS.PURPLE)
-
-    local eligible = countEligiblePlayers()
-    if eligible < 2 then
-        if Config.V4Hop then
-            setStatus("V4", "NO TARGETS", "Hopping server (need 2+ different races)", COLORS.PURPLE)
-            log("Only " .. eligible .. " different race(s) - hopping...", COLORS.YELLOW)
-            task.wait(3)
-            serverHop()
-            return false
-        else
-            setStatus("V4", "WAITING", "Need 2+ players of different races", COLORS.PURPLE)
-            task.wait(10)
-            return false
-        end
+    setSt("V4: CHECKING", "Counting races...", C.PUR)
+    local n = countRaces()
+    if n < 2 then
+        setSt("V4: HOPPING", "Need 2+ races, hopping...", C.PUR)
+        addLog("Only " .. n .. " race(s), hopping", C.YEL)
+        task.wait(3)
+        hop()
+        return false
     end
 
     if not isFullMoon() then
-        setStatus("MOON", "WAITING FULL MOON", "Full moon required", COLORS.PURPLE)
-        log("Waiting for full moon...", COLORS.YELLOW)
+        setSt("V4: WAITING MOON", "Full moon required", C.PUR)
+        addLog("Waiting full moon...", C.YEL)
         task.wait(30)
         return false
     end
 
-    local TempleOfTime = CFrame.new(-7894, 5548, -380)
-    local TrialDoors = {
-        Human   = CFrame.new(-7894, 5548, -350),
-        Mink    = CFrame.new(-7894, 5548, -370),
-        Fishman = CFrame.new(-7894, 5548, -390),
-        Skypiea = CFrame.new(-7648, 5586, -1414),
-        Cyborg  = CFrame.new(5331, 54, 4038),
-        Ghoul   = CFrame.new(-9479, 142, 5566),
-        Angel   = CFrame.new(-7894, 5548, -470),
-        Shark   = CFrame.new(-7894, 5548, -490),
-    }
-
-    setStatus("V4", "TELEPORTING", "Going to Temple of Time", COLORS.PURPLE)
-    log("Teleporting to Temple of Time", COLORS.PURPLE)
-    teleport(TempleOfTime.Position)
+    setSt("V4: TELEPORT", "Going to Temple of Time", C.PUR)
+    addLog("TP to Temple of Time", C.PUR)
+    tp(Vector3.new(-7894, 5548, -380))
     task.wait(3)
 
-    local door = TrialDoors[myRace] or TrialDoors.Human
-    setStatus("V4", "AT DOOR", "Activating race ability...", COLORS.PURPLE)
-    teleport(door.Position)
+    setSt("V4: ABILITY", "Activating race ability", C.PUR)
+    UIS:SendKeyEvent(true, Enum.KeyCode.Y, false, game)
+    task.wait(0.1)
+    UIS:SendKeyEvent(false, Enum.KeyCode.Y, false, game)
     task.wait(2)
 
-    activateRaceAbility()
-    log("Race ability activated - waiting for door", COLORS.PURPLE)
-    setStatus("V4", "TRIAL STARTED", "Fighting...", COLORS.PURPLE)
+    setSt("V4: TRIAL", "Fighting mobs...", C.PUR)
+    addLog("Trial started", C.PUR)
 
-    local _, humanoid, root = getCharacter()
-    if not humanoid or not root then return false end
-
-    for i = 1, 120 do
-        task.wait(2)
-
+    for i = 1, 60 do
+        task.wait(3)
         if hasV4() then
-            log("V4 UNLOCKED!", COLORS.GREEN)
-            setStatus("V4", "RACE V4 UNLOCKED", "Complete!", COLORS.GREEN)
+            setSt("V4 UNLOCKED", "Complete!", C.GRN)
+            addLog("V4 UNLOCKED!", C.GRN)
             return true
         end
-
-        local hpPct = (humanoid.Health / humanoid.MaxHealth) * 100
-        if hpPct < Config.SafeHealth then
-            teleport(root.Position + Vector3.new(0, 200, 0))
+        local h = getHum()
+        local r = getRoot()
+        if h and r and (h.Health / h.MaxHealth) * 100 < Config.SafeHealth then
+            tp(r.Position + Vector3.new(0, 200, 0))
             task.wait(2)
         end
-
-        local nearest = nil
-        local nearestDist = 200
-        for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and obj ~= root and obj.Parent then
-                if obj.Parent:FindFirstChild("Humanoid") then
-                    local d = (root.Position - obj.Position).Magnitude
-                    if d < nearestDist then
-                        nearestDist = d
-                        nearest = obj
-                    end
-                end
-            end
-        end
-
-        if nearest then
-            for _, key in ipairs({Enum.KeyCode.Z, Enum.KeyCode.X, Enum.KeyCode.C}) do
-                UserInputService:SendKeyEvent(true, key, false, game)
-                task.wait(0.05)
-                UserInputService:SendKeyEvent(false, key, false, game)
-                task.wait(math.random(8, 25) / 100)
-            end
-        end
+        UIS:SendKeyEvent(true, Enum.KeyCode.Z, false, game)
+        task.wait(0.05)
+        UIS:SendKeyEvent(false, Enum.KeyCode.Z, false, game)
+        task.wait(0.1)
+        UIS:SendKeyEvent(true, Enum.KeyCode.X, false, game)
+        task.wait(0.05)
+        UIS:SendKeyEvent(false, Enum.KeyCode.X, false, game)
+        task.wait(0.1)
+        UIS:SendKeyEvent(true, Enum.KeyCode.C, false, game)
+        task.wait(0.05)
+        UIS:SendKeyEvent(false, Enum.KeyCode.C, false, game)
+        task.wait(math.random(10, 30) / 100)
     end
 
-    local AncientClock = CFrame.new(-7894, 5560, -380)
-    log("Trial ended - going to Ancient Clock", COLORS.PURPLE)
-    teleport(AncientClock.Position)
+    setSt("V4: CLOCK", "Going to Ancient Clock", C.PUR)
+    tp(Vector3.new(-7894, 5560, -380))
     task.wait(3)
 
     if hasV4() then
-        log("V4 UNLOCKED via Ancient Clock!", COLORS.GREEN)
-        setStatus("V4", "RACE V4 UNLOCKED", "Complete!", COLORS.GREEN)
+        setSt("V4 UNLOCKED", "Complete!", C.GRN)
+        addLog("V4 via Clock!", C.GRN)
         return true
     end
 
-    log("V4 failed - try again", COLORS.RED)
-    setStatus("V4", "FAILED", "Try again", COLORS.RED)
+    setSt("V4 FAILED", "Try again", C.RED)
+    addLog("V4 failed", C.RED)
     return false
 end
 
-local function autoBounty()
-    local _, humanoid, root = getCharacter()
-    if not humanoid or not root then return end
+local function doBounty()
+    local h = getHum()
+    local r = getRoot()
+    if not h or not r then return end
 
-    local bounty = getBounty()
-    setStatus("PVP", "BOUNTY: " .. string.format("%.1fM / 10M", bounty / 1000000),
-        "Finding target...", COLORS.RED)
+    local bty = getBty()
+    setSt("BOUNTY: " .. string.format("%.1fM/10M", bty / 1000000), "Finding target...", C.RED)
 
     local target = nil
-    local bestBounty = 0
-
+    local best = 0
     for _, p in ipairs(game.Players:GetPlayers()) do
         if p ~= player then
             local ls = p:FindFirstChild("leaderstats")
             if ls then
                 local b = ls:FindFirstChild("Bounty") or ls:FindFirstChild("Honor")
-                if b and b.Value > bestBounty and b.Value <= 30000000 then
+                if b and b.Value > best and b.Value <= 30000000 then
+                    local fr = p:FindFirstChild("Blox Fruit")
+                    local fn = fr and fr.Value or ""
                     local skip = false
-                    local fruit = p:FindFirstChild("Blox Fruit")
-                    local fruitName = fruit and fruit.Value or ""
                     for _, f in ipairs(Config.SkipFruits) do
-                        if fruitName:find(f) then skip = true break end
+                        if fn:find(f) then skip = true break end
                     end
                     if not skip then
-                        bestBounty = b.Value
+                        best = b.Value
                         target = p
                     end
                 end
@@ -556,104 +385,110 @@ local function autoBounty()
     end
 
     if not target then
-        setStatus("PVP", "BOUNTY", "No targets... waiting", COLORS.RED)
+        setSt("BOUNTY", "No targets, waiting...", C.RED)
         task.wait(5)
         return
     end
 
-    local tChar = target.Character
-    if not tChar then return end
-    local tRoot = tChar:FindFirstChild("HumanoidRootPart")
-    if not tRoot then return end
+    local tc = target.Character
+    if not tc then return end
+    local tr = tc:FindFirstChild("HumanoidRootPart")
+    if not tr then return end
 
-    local dist = (root.Position - tRoot.Position).Magnitude
-    if dist > 150 then
-        teleport(tRoot.Position)
+    if (r.Position - tr.Position).Magnitude > 150 then
+        tp(tr.Position)
     end
 
-    local hpPct = (humanoid.Health / humanoid.MaxHealth) * 100
-    if hpPct < Config.SafeHealth then
-        setStatus("HP", "LOW HP", "Running away...", COLORS.RED)
-        teleport(root.Position + Vector3.new(0, 5000, 0))
+    local hp = (h.Health / h.MaxHealth) * 100
+    if hp < Config.SafeHealth then
+        setSt("LOW HP", "Running...", C.RED)
+        tp(r.Position + Vector3.new(0, 5000, 0))
         task.wait(3)
         return
     end
 
-    setStatus("PVP", "ATTACK: " .. target.Name, bestBounty .. " bounty", COLORS.RED)
-    log("Attacking: " .. target.Name, COLORS.RED)
+    setSt("ATTACK: " .. target.Name, best .. " bounty", C.RED)
+    addLog("Attacking: " .. target.Name, C.RED)
 
     for i = 1, 15 do
-        if not target.Character or not target.Character:FindFirstChild("Humanoid") then break end
-        local tHum = target.Character:FindFirstChild("Humanoid")
-        if tHum and tHum.Health <= 0 then break end
-
-        for _, key in ipairs({Enum.KeyCode.Z, Enum.KeyCode.X, Enum.KeyCode.C}) do
-            UserInputService:SendKeyEvent(true, key, false, game)
-            task.wait(0.05)
-            UserInputService:SendKeyEvent(false, key, false, game)
-            task.wait(math.random(8, 25) / 100)
-        end
-        task.wait(0.1)
+        local tc2 = target.Character
+        if not tc2 then break end
+        local th = tc2:FindFirstChild("Humanoid")
+        if not th or th.Health <= 0 then break end
+        UIS:SendKeyEvent(true, Enum.KeyCode.Z, false, game)
+        task.wait(0.05)
+        UIS:SendKeyEvent(false, Enum.KeyCode.Z, false, game)
+        task.wait(math.random(8, 20) / 100)
+        UIS:SendKeyEvent(true, Enum.KeyCode.X, false, game)
+        task.wait(0.05)
+        UIS:SendKeyEvent(false, Enum.KeyCode.X, false, game)
+        task.wait(math.random(8, 20) / 100)
+        UIS:SendKeyEvent(true, Enum.KeyCode.C, false, game)
+        task.wait(0.05)
+        UIS:SendKeyEvent(false, Enum.KeyCode.C, false, game)
+        task.wait(math.random(8, 20) / 100)
     end
 
-    if not target.Character or not target.Character:FindFirstChild("Humanoid") then
-        local newBounty = getBounty()
-        log("KILL: " .. target.Name .. " -> Bounty: " .. newBounty, COLORS.GREEN)
-        setStatus("KILL", "Killed: " .. target.Name, "Bounty: " .. newBounty, COLORS.CYAN)
+    local tc3 = target.Character
+    if not tc3 or not tc3:FindFirstChild("Humanoid") then
+        local nb = getBty()
+        addLog("KILL: " .. target.Name .. " -> " .. nb, C.GRN)
+        setSt("KILL: " .. target.Name, "Bounty: " .. nb, C.CYN)
         task.wait(2)
     end
 end
 
-local function doFarmLevel()
-    setStatus("FARM", "FARM LEVEL", "Farming boss/quest", COLORS.GREEN)
-    task.wait(5)
-end
-
-local function doQuest()
-    setStatus("QST", "QUEST", "Completing mission", COLORS.YELLOW)
-    task.wait(3)
-end
-
-local function doShop()
-    setStatus("SHOP", "SHOP", "Buying items", COLORS.ACCENT)
-    task.wait(3)
-end
-
-local function doFruit()
-    setStatus("FRT", "FRUIT", "Searching for fruit", COLORS.PURPLE)
-    task.wait(3)
-end
-
-setStatus("...", "STARTING", "Waiting for character...", COLORS.ACCENT)
-log("Kaitun started!", COLORS.GREEN)
+setSt("WAITING", "Character spawning...", C.ACC)
+addLog("Kaitun loaded", C.GRN)
 
 repeat task.wait(1) until player.Character and player.Character:FindFirstChild("Humanoid")
 task.wait(2)
-
-log("Character ready. Starting loop...", COLORS.GREEN)
+addLog("Ready. Starting loop.", C.GRN)
 
 while true do
     task.wait(2)
+    local l = getLvl()
+    local b = getBty()
+    upStats()
 
-    local level = getLevel()
-    local bounty = getBounty()
-    updateStats()
-
-    if level < Config.MaxLevel then
+    if l < Config.MaxLevel then
         if Config.AutoV4 and hasV3() and not hasV4() then
-            autoV4()
-        elseif hasQuest() then
-            doQuest()
-        elseif needFruit() then
-            doFruit()
+            doV4()
         else
-            doFarmLevel()
+            setSt("FARM", "Farming level...", C.GRN)
+            task.wait(3)
         end
-    elseif bounty < Config.TargetBounty then
-        autoBounty()
+    elseif b < Config.TargetBounty then
+        doBounty()
     else
-        setStatus("DONE", "COMPLETE!", "Max Level + 10M Bounty", COLORS.CYAN)
-        log("ALL DONE! Max level + 10M bounty!", COLORS.CYAN)
+        setSt("COMPLETE", "Max Level + 10M Bounty", C.CYN)
+        addLog("ALL DONE!", C.CYN)
         break
     end
 end
+
+end)
+
+if not ok then
+    local pg = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    local ef = Instance.new("Frame")
+    ef.Size = UDim2.new(0, 300, 0, 150)
+    ef.Position = UDim2.new(0, 20, 0, 40)
+    ef.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+    ef.Parent = pg
+    local ec = Instance.new("UICorner")
+    ec.CornerRadius = UDim.new(0, 10)
+    ec.Parent = ef
+    local et = Instance.new("TextLabel")
+    et.Size = UDim2.new(1, -20, 1, -10)
+    et.Position = UDim2.new(0, 10, 0, 5)
+    et.BackgroundTransparency = 1
+    et.Text = "ERROR:\n" .. tostring(err)
+    et.TextColor3 = Color3.fromRGB(255, 100, 100)
+    et.TextSize = 12
+    et.Font = Enum.Font.Gotham
+    et.TextXAlignment = Enum.TextXAlignment.Left
+    et.TextYAlignment = Enum.TextYAlignment.Top
+    et.TextWrapped = true
+    et.Parent = ef
+end   
