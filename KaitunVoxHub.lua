@@ -1,10 +1,10 @@
 local Config = {
     MaxLevel = 2800,
     TargetBounty = 10000000,
-    Team = "Pirates",
+    Team = "Marines",
     SafeHealth = 20,
     Race = "Mink",
-    SkipFruits = {"Buddha", "T-Rex", "Leopard", "Dough"},
+    SkipFruits = {"Buddha", "T-Rex", "Leopard", "Dough", "Portal"},
     AutoV4 = true,
     V4Hop = true,
 }
